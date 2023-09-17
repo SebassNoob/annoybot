@@ -5,3 +5,6 @@ db/local.db
 # ignore python compiled files
 __pycache__/
 *.pyc
+
+# ignore env sensitive file
+.env.local

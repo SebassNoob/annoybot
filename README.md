@@ -24,12 +24,16 @@ docker && docker compose
 GNU Make
 ```
 
+Pre-run:
+
+- Create a file named ``.env.local`` and set ``TOKEN=your_token``
+
 Run:
 ```sh
 source venv/bin/activate || venv\Scripts\activate # (macOS/linux OR windows)
 make run
-make migrate # handles alembic upgrades
 make init_db # skip if db is initialised already
+make migrate # handles alembic upgrades
 ```
 format: ``make black`` :)
 
