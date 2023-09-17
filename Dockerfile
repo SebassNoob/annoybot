@@ -6,6 +6,8 @@ COPY requirements.txt .
 COPY .env.local .
 COPY --link src ./src
 
+COPY db ./db
+
 RUN pip install -r requirements.txt
 RUN apk add --update npm
 RUN npm i -g nodemon

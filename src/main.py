@@ -14,6 +14,10 @@ import collections
 import logging
 from logging.handlers import TimedRotatingFileHandler
 
+# add parent directory to path
+sys.path.insert(1, os.getcwd())
+from db.client import make_engine
+
 
 # initialize bot
 class Bot(commands.AutoShardedBot):
@@ -24,7 +28,9 @@ class Bot(commands.AutoShardedBot):
         super().__init__(
             command_prefix="a$", intents=intents, shard_count=1, help_command=None
         )
+        # make a logger and a database engine for the bot
         self.logger = logging.getLogger("bot")
+        self.engine = make_engine(loc="db:8080")
 
     async def on_ready(self):
         servers = len(self.guilds)

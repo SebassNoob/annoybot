@@ -32,7 +32,6 @@ def test_db(engine: Engine):
         session.commit()
         res = session.query(Hello).all()
         print(res)
-        session.close()
 
 
 if __name__ == "__main__":

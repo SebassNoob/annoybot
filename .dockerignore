@@ -1,0 +1,14 @@
+
+# python files
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# alembic cfg
+alembic.ini
+db/alembic
+
+
+# ignore websocketed db
+db/local.db
