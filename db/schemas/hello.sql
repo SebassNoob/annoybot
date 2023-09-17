@@ -1,4 +1,0 @@
-CREATE TABLE hello (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    msg TEXT
-);

@@ -1,62 +1,42 @@
-import asyncio
-import os
 import sys
-from client import create_client
+from client import make_engine
+from models.base import Base
+from models.hello import Hello
+from sqlalchemy.orm import Session
+
+from sqlalchemy.engine import Engine
 
 
-async def init_db():
+def init_db(engine: Engine):
     """
-    Reads all the files in the schemas directory and executes them
+    Creates all the tables in the database
     """
-    client = await create_client()
-    fp = os.listdir(os.path.dirname(__file__) + "/schemas")
-    print("\n")
-    for f in fp:
-        with open(os.path.dirname(__file__) + "/schemas/" + f, "r") as file:
-            cmd = file.read()
-            print(cmd)
-            await client.execute(cmd)
 
-    await client.close()
+    Base.metadata.create_all(engine)
 
 
-async def drop_db():
+def drop_db(engine: Engine):
     """
-    Reads all the files in the schemas directory and drops them based on the file name
+    Drops all the tables in the database
     """
-    client = await create_client()
-    fp = os.listdir(os.path.dirname(__file__) + "/schemas")
-    print("\n")
-    for f in fp:
-        with open(os.path.dirname(__file__) + "/schemas/" + f, "r") as file:
-            # drops all tables (tables are named after the file name)
-            cmd = (
-                "DROP TABLE IF EXISTS "
-                + os.path.splitext(os.path.basename(file.name))[0]
-                + ";"
-            )
-            print(cmd)
-            await client.execute(cmd)
-
-    await client.close()
+    Base.metadata.drop_all(engine)
 
 
-async def test_db():
+def test_db(engine: Engine):
     """
     Attempts to write and read a test value from table "hello"
     """
-    client = await create_client()
-
-    await client.execute("INSERT INTO hello (id, msg) VALUES (?, ?);", (None, "world"))
-    result = await client.execute("SELECT * FROM hello;")
-    print("\nResult:")
-    print([row.asdict() for row in result.rows])
-    await client.close()
+    new = Hello(msg="Hello World!")
+    with Session(engine) as session:
+        session.add(new)
+        session.commit()
+        res = session.query(Hello).all()
+        print(res)
+        session.close()
 
 
 if __name__ == "__main__":
-    
-
+    engine = make_engine(echo=True, debug=True)
     # mapping of command line arguments to functions
     mapping = {"init": init_db, "drop": drop_db, "test": test_db}
 
@@ -67,16 +47,14 @@ if __name__ == "__main__":
         print("Usage: python init_db.py <init|drop|test>")
         sys.exit(1)
 
-    
-    loop = asyncio.new_event_loop()
     try:
         # run the corresponding function
-        loop.run_until_complete(mapping[sys.argv[1]]())
+        mapping[sys.argv[1]](engine)
     except Exception as e:
         print(e)
-        loop.close()
+        engine.dispose()
         sys.exit(1)
 
-    # close the event loop and exit
-    loop.close()
+    # close the engine and exit
+    engine.dispose()
     sys.exit(0)

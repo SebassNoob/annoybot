@@ -26,7 +26,8 @@ GNU Make
 
 Run:
 ```sh
-make init_db # skip if db is initialised already
+source venv/bin/activate || venv\Scripts\activate # (macOS/linux OR windows)
 make run
+make init_db # skip if db is initialised already
 ```
 format: ``make black`` :)

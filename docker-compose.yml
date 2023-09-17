@@ -2,6 +2,7 @@ version: "3"
 
 services:
   main:
+    container_name: bot
     build: 
       context: ./
       dockerfile: Dockerfile
@@ -15,6 +16,7 @@ services:
     depends_on:
       - db
   db:
+    container_name: db
     image: ghcr.io/libsql/sqld:main
     networks:
       - annoybot-network
