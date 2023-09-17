@@ -4,6 +4,8 @@ from discord.ext import commands
 
 
 class Servers(commands.Cog):
+    """Command for getting name and id about servers the bot is in"""
+
     def __init__(self, bot):
         self.bot = bot
 
