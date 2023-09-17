@@ -2,7 +2,7 @@
 
 This is the 2.0 rewrite for annoybot. ([<= 1.9.0 repo](https://github.com/SebassNoob/bot))
 
-Built with discord.py 2.0 and Turso.
+Built with discord.py and Turso.
 
 ## About
 A discord.py bot primarily used to annoy your friends, harmlessly.
@@ -28,6 +28,9 @@ Run:
 ```sh
 source venv/bin/activate || venv\Scripts\activate # (macOS/linux OR windows)
 make run
+make migrate # handles alembic upgrades
 make init_db # skip if db is initialised already
 ```
 format: ``make black`` :)
+
+alembic revision: ``alembic revision -m "my_revision"``
