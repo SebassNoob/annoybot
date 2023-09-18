@@ -3,10 +3,12 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 import os
 import sys
+import io
+import discord
 
 
 sys.path.insert(1, f"{os.getcwd()}/db")
-from db.models.hello import Hello
+from db.models import Hello
 
 
 class Testdb(commands.Cog):
@@ -27,8 +29,9 @@ class Testdb(commands.Cog):
                 await ctx.send(res)
                 return
             sql = text(" ".join(query))
-            res = session.execute(sql).all()
-            await ctx.send(res)
+            res = session.execute(sql).all().__repr__()
+            f = discord.File(io.StringIO(res), "query.txt")
+            await ctx.send(file=f)
 
 
 async def setup(bot):

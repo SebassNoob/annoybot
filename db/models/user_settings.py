@@ -1,12 +1,13 @@
 from sqlalchemy import Integer, Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from . import Base, Snipe
+from typing import Optional
 
 
 class UserSettings(Base):
     __tablename__ = "user_settings"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    snipe: Mapped[Snipe] = relationship(backref="snipe")
+    snipe: Mapped[Optional[Snipe]] = relationship(backref="snipe")
 
     color: Mapped[str] = mapped_column(String(6))
     family_friendly: Mapped[bool] = mapped_column(Boolean)
