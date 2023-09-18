@@ -24,6 +24,8 @@ from logging.handlers import TimedRotatingFileHandler
 sys.path.insert(1, os.getcwd())
 from db.client import make_engine
 
+from src.checks import add_users_to_db, custom_cooldown, blacklist_check
+
 
 # initialize bot
 class Bot(commands.AutoShardedBot):
@@ -53,6 +55,14 @@ class Bot(commands.AutoShardedBot):
         await self.change_presence(
             activity=discord.Game(name=f"/help | annoying {servers} servers")
         )
+
+        # add checks to commands
+        for cmd in self.tree.walk_commands():
+            if not isinstance(cmd, app_commands.Group):
+                cmd.add_check(add_users_to_db)
+                cmd.add_check(blacklist_check)
+
+            cmd = app_commands.checks.dynamic_cooldown(custom_cooldown)(cmd)
 
     # load cogs
     async def setup_hook(self):
