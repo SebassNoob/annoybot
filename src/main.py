@@ -6,6 +6,12 @@ import sys
 dotenv.load_dotenv(f"{os.getcwd()}/.env")
 dotenv.load_dotenv(f"{os.getcwd()}/.env.local")
 
+# check if the bot is running in production mode
+if len(sys.argv) > 1 and "--prod" in sys.argv:
+    PROD = True
+else:
+    PROD = False
+
 import discord
 from discord.ext import commands
 from discord import app_commands
@@ -30,7 +36,10 @@ class Bot(commands.AutoShardedBot):
         )
         # make a logger and a database engine for the bot
         self.logger = logging.getLogger("bot")
-        self.engine = make_engine(loc="db:8080")
+
+        # if env is PROD, use the production database, else use the development database
+        loc = os.getenv("PROD_DB_LOC") if PROD else os.getenv("DEV_DB_LOC")
+        self.engine = make_engine(loc=loc)
 
     async def on_ready(self):
         servers = len(self.guilds)

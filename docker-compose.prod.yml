@@ -1,0 +1,37 @@
+version: "3"
+
+services:
+  main:
+    container_name: bot
+    build: 
+      context: ./
+      dockerfile: prod.Dockerfile
+    networks:
+      - annoybot-network
+    env_file:
+      - .env
+      - .env.local
+    volumes:
+      - ./src:/app/src
+    restart: always
+    depends_on:
+      - db
+  db:
+    container_name: db
+    image: ghcr.io/libsql/sqld:main
+    networks:
+      - annoybot-network
+    env_file:
+      - .env
+      - .env.local
+    volumes:
+      - ./db/local.db:/var/lib/sqld
+    restart: always
+    ports:
+      - 8080:8080
+
+networks:
+  annoybot-network:
+    name: annoybot-network
+    driver: bridge
+

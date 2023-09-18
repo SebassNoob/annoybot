@@ -5,11 +5,12 @@ services:
     container_name: bot
     build: 
       context: ./
-      dockerfile: Dockerfile
+      dockerfile: dev.Dockerfile
     networks:
       - annoybot-network
     env_file:
       - .env
+      - .env.local
     volumes:
       - ./src:/app/src
     restart: on-failure
@@ -22,6 +23,7 @@ services:
       - annoybot-network
     env_file:
       - .env
+      - .env.local
     volumes:
       - ./db/local.db:/var/lib/sqld
     restart: on-failure
@@ -30,5 +32,6 @@ services:
 
 networks:
   annoybot-network:
+    name: annoybot-network
     driver: bridge
 
