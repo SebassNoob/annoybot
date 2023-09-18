@@ -25,6 +25,13 @@ sys.path.insert(1, os.getcwd())
 from db.client import make_engine
 
 from src.checks import add_users_to_db, custom_cooldown, blacklist_check
+from sqlalchemy.orm import Session
+
+from db.models.server_settings import ServerSettings
+from db.models.autoresponse import Autoresponse
+from db.models.user_server import UserServer
+
+from utils import read_csv
 
 
 # initialize bot
@@ -63,6 +70,48 @@ class Bot(commands.AutoShardedBot):
                 cmd.add_check(blacklist_check)
 
             cmd = app_commands.checks.dynamic_cooldown(custom_cooldown)(cmd)
+
+    async def on_guild_join(self, guild):
+        self.logger.info(f"joined {guild.name}: {guild.id}")
+
+        # create server settings
+        with Session(self.engine) as session:
+            session.add(ServerSettings(id=guild.id, autoresponse_on=False))
+
+            # add default autoresponses
+            default = read_csv(f"{os.getcwd()}/src/public/default_autoresponse.csv")
+            res = []
+            for msg, response in default:
+                res.append(Autoresponse(server_id=guild.id, msg=msg, response=response))
+            session.add_all(res)
+            session.commit()
+
+        # send welcome message
+        for channel in guild.text_channels:
+            if channel.permissions_for(guild.me).send_messages:
+                with open(f"{os.getcwd()}/src/static/welcome_message.txt", "r") as w:
+                    em = discord.Embed(
+                        color=0x000555,
+                        title="A very suitable welcome message",
+                        description=w.read(),
+                    )
+                em.set_footer(text="The embodiment of discord anarchy")
+                await channel.send(embed=em)
+                return
+        # if there is no channel where the bot is allowed to send the welcome message in, ignore and log the server
+        self.logger.warning(f"failed to send welcome to {guild.name}: {guild.id}")
+
+    async def on_guild_remove(self, guild):
+        self.logger.info(f"left {guild.name}: {guild.id}")
+
+        # delete server settings
+        with Session(self.engine) as session:
+            session.query(Autoresponse).filter(
+                Autoresponse.server_id == guild.id
+            ).delete()
+            session.query(ServerSettings).filter(ServerSettings.id == guild.id).delete()
+            session.query(UserServer).filter(UserServer.server_id == guild.id).delete()
+            session.commit()
 
     # load cogs
     async def setup_hook(self):

@@ -13,7 +13,8 @@ services:
       - .env.local
     volumes:
       - ./src:/app/src
-    restart: on-failure
+      - ./db:/app/db
+    restart: unless-stopped
     depends_on:
       - db
   db:
@@ -26,7 +27,7 @@ services:
       - .env.local
     volumes:
       - ./db/local.db:/var/lib/sqld
-    restart: on-failure
+    restart: unless-stopped
     ports:
       - 8080:8080
 

@@ -7,5 +7,7 @@ def make_engine(
     *, loc: str = "localhost:8080", echo: bool = False, debug: bool = False
 ) -> Engine:
     url = f"sqlite+libsql://{loc}"
-    engine = create_engine(url, echo=echo, echo_pool=debug)
+    engine = create_engine(
+        url, echo=echo, echo_pool=debug, isolation_level="AUTOCOMMIT"
+    )
     return engine

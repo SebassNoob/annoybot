@@ -1,7 +1,9 @@
 from discord.ext import commands
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 import os
 import sys
+
 
 sys.path.insert(1, f"{os.getcwd()}/db")
 from db.models.hello import Hello
@@ -15,11 +17,17 @@ class Testdb(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def testdb(self, ctx):
+    async def testdb(self, ctx, *query: str):
         with Session(self.bot.engine) as session:
-            session.add(Hello(msg="Hello World!"))
-            session.commit()
-            res = session.query(Hello).all()
+            # if no query is given, insert a test value and emit the entire table
+            if len(query) == 0:
+                session.add(Hello(msg="Hello World!"))
+                session.commit()
+                res = session.query(Hello).all()
+                await ctx.send(res)
+                return
+            sql = text(" ".join(query))
+            res = session.execute(sql).all()
             await ctx.send(res)
 
 

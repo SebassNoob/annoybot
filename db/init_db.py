@@ -1,9 +1,16 @@
 import sys
 from client import make_engine
-from models.base import Base
-from models.hello import Hello
-from sqlalchemy.orm import Session
+from models import (
+    Autoresponse,
+    Base,
+    Hello,
+    ServerSettings,
+    Snipe,
+    UserServer,
+    UserSettings,
+)
 
+from sqlalchemy.orm import Session
 from sqlalchemy.engine import Engine
 
 
@@ -11,7 +18,6 @@ def init_db(engine: Engine):
     """
     Creates all the tables in the database
     """
-
     Base.metadata.create_all(engine)
 
 
@@ -32,6 +38,7 @@ def test_db(engine: Engine):
         session.commit()
         res = session.query(Hello).all()
         print(res)
+        session.close()
 
 
 if __name__ == "__main__":

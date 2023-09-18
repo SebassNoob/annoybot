@@ -12,4 +12,4 @@ RUN pip install -r requirements.txt
 RUN apk add --update npm
 RUN npm i -g nodemon
 
-CMD ["nodemon","-L", "--watch", "src", "--exec", "python","src/main.py"]
+CMD ["nodemon","-L", "--watch", "src", "--watch", "db/models", "--exec", "python","src/main.py"]
