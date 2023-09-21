@@ -4,7 +4,11 @@ from discord.ext import commands
 from discord import app_commands
 from typing import Optional, Union
 import random
-from src.utils import changeff, parse_txt
+from src.utils import parse_txt
+from better_profanity import profanity
+
+from sqlalchemy.orm import Session
+from db.models import UserSettings
 
 
 class Roast(commands.Cog):
@@ -23,12 +27,16 @@ class Roast(commands.Cog):
     ):
         roast = random.choice(self.roasts)
 
-        # TODO: add checks for color and ff
-        if False:
-            roast = changeff(roast)
-        # color = colorSetup(interaction.user.id)
-        color = 0x000000
-        embedVar = discord.Embed(color=color, description=roast)
+        with Session(self.bot.engine) as session:
+            ff, color = (
+                session.query(UserSettings.family_friendly, UserSettings.color)
+                .filter(UserSettings.id == interaction.user.id)
+                .one()
+            )
+            if ff:
+                roast = profanity.censor(roast)
+
+        embedVar = discord.Embed(color=int(color, 16), description=roast)
         embedVar.set_author(
             name=f"Roast from {interaction.user.display_name}",
             icon_url=interaction.user.display_avatar,

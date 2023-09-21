@@ -109,9 +109,11 @@ class Bot(commands.AutoShardedBot):
 
             # add default autoresponses
             default = read_csv(f"{os.getcwd()}/src/public/default_autoresponse.csv")
-            res = []
-            for msg, response in default:
-                res.append(Autoresponse(server_id=guild.id, msg=msg, response=response))
+            res = [
+                Autoresponse(server_id=guild.id, msg=msg, response=response)
+                for msg, response in default
+            ]
+
             session.add_all(res)
             session.commit()
         if send_welcome:
@@ -126,8 +128,8 @@ class Bot(commands.AutoShardedBot):
             session.query(Autoresponse).filter(
                 Autoresponse.server_id == guild.id
             ).delete()
-            session.query(ServerSettings).filter(ServerSettings.id == guild.id).delete()
             session.query(UserServer).filter(UserServer.server_id == guild.id).delete()
+            session.query(ServerSettings).filter(ServerSettings.id == guild.id).delete()
             session.commit()
 
     def err_handler_wrapped(self):
