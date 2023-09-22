@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
-from src.utils import parse_txt
 from better_profanity import profanity
 
 from sqlalchemy.orm import Session

@@ -17,6 +17,7 @@ from discord.ext import commands
 from discord import app_commands
 
 import collections
+import datetime
 import logging
 from logging.handlers import TimedRotatingFileHandler
 
@@ -33,7 +34,7 @@ from src.checks import (
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
-from db.models import Autoresponse, ServerSettings, UserServer
+from db.models import Autoresponse, ServerSettings, UserServer, Snipe, UserSettings
 
 from utils import read_csv
 
@@ -157,6 +158,85 @@ class Bot(commands.AutoShardedBot):
                 return
 
         return err_handler
+
+    # only occurs for message commands
+    async def on_command_error(self, ctx, error):
+        await ctx.send(error)
+
+    async def on_message_delete(self, message: discord.Message):
+        current_time = datetime.datetime.now()
+        if isinstance(message.channel, discord.abc.GuildChannel):
+            nsfw = message.channel.nsfw
+        elif isinstance(message.channel, discord.Thread):
+            nsfw = message.channel.parent.nsfw
+        else:
+            nsfw = True
+
+        with Session(self.engine) as session:
+            try:
+                usersettings_present = (
+                    session.query(UserSettings)
+                    .filter(UserSettings.id == message.author.id)
+                    .one_or_none()
+                )
+
+                if message.guild:
+                    userserver_present = (
+                        session.query(UserServer)
+                        .filter(
+                            UserServer.user_id == message.author.id
+                            or UserServer.server_id == message.guild.id
+                        )
+                        .all()
+                    )
+                snipe_present = (
+                    session.query(Snipe)
+                    .filter(Snipe.id == message.author.id)
+                    .one_or_none()
+                )
+                # if the user is not in the db, add them
+                if not usersettings_present:
+                    session.add(
+                        UserSettings(
+                            id=message.author.id,
+                            color="000000",
+                            family_friendly=False,
+                            sniped=True,
+                            block_dms=False,
+                        )
+                    )
+                    session.commit()
+
+                if message.guild and not userserver_present:
+                    session.add(
+                        UserServer(
+                            user_id=message.author.id,
+                            server_id=message.guild.id,
+                            blacklist=False,
+                        )
+                    )
+                    session.commit()
+                if not snipe_present:
+                    session.add(
+                        Snipe(
+                            id=message.author.id,
+                            msg=message.content,
+                            date=current_time,
+                            nsfw=nsfw,
+                        )
+                    )
+                else:
+                    session.query(Snipe).filter(Snipe.id == message.author.id).update(
+                        {
+                            Snipe.msg: message.content,
+                            Snipe.date: current_time,
+                            Snipe.nsfw: nsfw,
+                        }
+                    )
+                session.commit()
+            except IntegrityError as e:
+                session.rollback()
+                self.logger.error(e)
 
     # load cogs
     async def setup_hook(self):

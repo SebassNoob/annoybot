@@ -2,7 +2,6 @@ import os
 import discord
 from discord.ext import commands
 from discord import app_commands
-from typing import Optional, Union
 import random
 from src.utils import parse_txt
 from better_profanity import profanity
