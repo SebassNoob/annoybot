@@ -30,13 +30,15 @@ class Meme(commands.Cog):
                 "https://www.reddit.com/r/nukedmemes/new.json?sort=hot",
             ]
         )
+        # tries to get all memes from all subreddits 1 time
+        self.get_all_memes.clear_exception_types()
+        self.get_all_memes.start()
+
         # this is a dict of subreddits mapped to a list of memes. each meme is a tuple of (title, url)
         self.meme_data = defaultdict(list)
-        # attempt to get all memes on startup
-
-        asyncio.run_coroutine_threadsafe(self.get_all_memes(), self.bot.loop)
 
         # start the loop to refresh memes every 2 minutes
+        self.get_memes.clear_exception_types()
         self.get_memes.start()
 
     @app_commands.command(name="meme", description="Sends a top meme from reddit")
@@ -67,6 +69,7 @@ class Meme(commands.Cog):
     def cog_unload(self):
         self.get_memes.cancel()
 
+    @tasks.loop(count=1, reconnect=False)
     async def get_all_memes(self):
         async with aiohttp.ClientSession() as session:
             for sub in self.subreddits:
@@ -76,9 +79,10 @@ class Meme(commands.Cog):
 
                 if status != 200:
                     self.bot.logger.warning(
-                        f"failed to get response from {sub}: {res.text}"
+                        f"failed to get response from {sub}: {status}"
                     )
-                    continue
+                    # if we fail to get a response from a subreddit, stop trying since we probably are rate limited
+                    self.get_all_memes.cancel()
 
                 try:
                     # parse the response
@@ -88,13 +92,12 @@ class Meme(commands.Cog):
                     ]
                 except KeyError:
                     self.bot.logger.warning(
-                        f"failed to parse response from {sub}: {res.status_code} {res.text}"
+                        f"failed to parse response from {sub}: {status}"
                     )
                 except Exception as e:
                     self.bot.logger.error(e)
-        return
 
-    @tasks.loop(seconds=120.0)
+    @tasks.loop(minutes=2.0, reconnect=False)
     async def get_memes(self):
         sub = next(self.subreddits)
         async with aiohttp.ClientSession() as session:
@@ -103,14 +106,13 @@ class Meme(commands.Cog):
             )
 
         if status != 200:
-            self.bot.logger.warning(f"failed to get response from {sub}: {res.text}")
-
-            # holdback for 30 seconds before trying again
-            self.get_memes.change_interval(seconds=self.get_memes.seconds + 30)
+            self.bot.logger.warning(f"failed to get response from {sub}: {status}")
+            # holdback for 1 min before trying again
+            self.get_memes.change_interval(minutes=self.get_memes.minutes + 1)
             return
         try:
-            # success! reset the interval to 120 seconds
-            self.get_memes.change_interval(seconds=120.0)
+            # success! reset the interval to 2 mins
+            self.get_memes.change_interval(minutes=2.0)
 
             # parse the response
 
@@ -118,9 +120,7 @@ class Meme(commands.Cog):
                 (i["data"]["title"], i["data"]["url"]) for i in res["data"]["children"]
             ]
         except KeyError:
-            self.bot.logger.warning(
-                f"failed to parse response from {sub}: {res.status_code} {res.text}"
-            )
+            self.bot.logger.warning(f"failed to parse response from {sub}: {status}")
         except Exception as e:
             self.bot.logger.error(e)
         return

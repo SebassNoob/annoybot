@@ -20,6 +20,8 @@ class Copypasta(commands.Cog):
 
         # a list of copypastas (title, selftext)
         self.copypastas = []
+
+        self.get_copypastas.clear_exception_types()
         self.get_copypastas.start()
 
     @app_commands.command(
@@ -52,7 +54,7 @@ class Copypasta(commands.Cog):
     def cog_unload(self):
         self.get_copypastas.cancel()
 
-    @tasks.loop(minutes=30.0)
+    @tasks.loop(minutes=30.0, reconnect=False)
     async def get_copypastas(self):
         sub = "https://www.reddit.com/r/copypasta/new.json?sort=hot"
         async with aiohttp.ClientSession() as session:
@@ -61,7 +63,7 @@ class Copypasta(commands.Cog):
             )
 
         if status != 200:
-            self.bot.logger.warning(f"failed to get response from {sub}: {res.text}")
+            self.bot.logger.warning(f"failed to get response from {sub}: {status}")
 
             # holdback for 10 min before trying again
             self.get_copypastas.change_interval(minutes=10)
@@ -81,9 +83,7 @@ class Copypasta(commands.Cog):
             ]
 
         except KeyError:
-            self.bot.logger.warning(
-                f"failed to parse response from {sub}: {res.status_code} {res.text}"
-            )
+            self.bot.logger.warning(f"failed to parse response from {sub}: {status}")
         except Exception as e:
             self.bot.logger.error(e)
         return
