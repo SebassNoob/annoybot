@@ -5,12 +5,11 @@ from discord import app_commands
 
 from sqlalchemy.orm import Session
 from db.models import UserSettings
+from src.utils import fetch_json
 
 import random
-from itertools import cycle
-from collections import defaultdict
 
-import requests
+import aiohttp
 
 
 class Copypasta(commands.Cog):
@@ -27,8 +26,6 @@ class Copypasta(commands.Cog):
         name="copypasta", description="Gets a copypasta from r/copypasta"
     )
     async def copypasta(self, interaction: discord.Interaction):
-        await interaction.response.defer()
-
         with Session(self.bot.engine) as session:
             color = (
                 session.query(UserSettings.color)
@@ -47,7 +44,7 @@ class Copypasta(commands.Cog):
 
         embed = discord.Embed(color=int(color, 16), title=title, description=desc)
 
-        await interaction.followup.send(
+        await interaction.response.send_message(
             content=f"source: https://www.reddit.com/r/copypasta/new.json?sort=hot",
             embed=embed,
         )
@@ -58,12 +55,16 @@ class Copypasta(commands.Cog):
     @tasks.loop(minutes=30.0)
     async def get_copypastas(self):
         sub = "https://www.reddit.com/r/copypasta/new.json?sort=hot"
-        res = requests.get(sub, headers={"Accept": "application/json"})
-        if res.status_code != 200:
+        async with aiohttp.ClientSession() as session:
+            res, status = await fetch_json(
+                session, sub, headers={"Accept": "application/json"}
+            )
+
+        if status != 200:
             self.bot.logger.warning(f"failed to get response from {sub}: {res.text}")
 
-            # holdback for 30 seconds before trying again
-            self.get_copypastas.change_interval(seconds=30)
+            # holdback for 10 min before trying again
+            self.get_copypastas.change_interval(minutes=10)
             return
         try:
             # success! reset the interval to 30 mins
@@ -72,9 +73,10 @@ class Copypasta(commands.Cog):
             # parse the response
             # this is a list of (title, selftext)
             # we only want copypastas that are less than 4000 characters
+
             self.copypastas = [
                 (i["data"]["title"], i["data"]["selftext"])
-                for i in res.json()["data"]["children"]
+                for i in res["data"]["children"]
                 if 0 < len(i["data"]["selftext"]) <= 4000
             ]
 

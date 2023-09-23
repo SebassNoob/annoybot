@@ -5,8 +5,9 @@ from better_profanity import profanity
 
 from sqlalchemy.orm import Session
 from db.models import UserSettings
+from src.utils import fetch_json
 
-import requests
+import aiohttp
 
 
 class Dadjoke(commands.Cog):
@@ -18,16 +19,21 @@ class Dadjoke(commands.Cog):
     @app_commands.command(name="dadjoke", description="Sends a typical dad joke.")
     async def dadjoke(self, interaction: discord.Interaction):
         await interaction.response.defer()
-        res = requests.get(
-            "https://icanhazdadjoke.com/", headers={"Accept": "application/json"}
-        )
-        if res.status_code != 200:
+        async with aiohttp.ClientSession() as session:
+            res, status = await fetch_json(
+                session,
+                "https://icanhazdadjoke.com/",
+                headers={"Accept": "application/json"},
+            )
+
+        if status != 200:
             await interaction.response.send_message(
                 content="❌ There was an error with the dad joke API. Try again later.",
                 ephemeral=True,
             )
             return
-        dadJoke = res.json()["joke"]
+
+        dadJoke = res["joke"]
         with Session(self.bot.engine) as session:
             ff, color = (
                 session.query(UserSettings.family_friendly, UserSettings.color)

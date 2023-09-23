@@ -1,4 +1,6 @@
 import csv
+from aiohttp import ClientSession
+from typing import Any
 
 
 def read_csv(path: str, *, as_dict=False) -> list[str] | list[dict[str, str]]:
@@ -25,3 +27,10 @@ def parse_txt(path: str) -> list[str]:
     with open(path, "r") as f:
         res = [r.replace("\n", "") for r in f.readlines()]
     return res
+
+
+async def fetch_json(
+    client: ClientSession, path: str, headers: dict[str, str]
+) -> tuple[dict[Any, Any], int]:
+    async with client.get(path, headers=headers) as response:
+        return await response.json(), response.status

@@ -29,6 +29,7 @@ class Dmthreaten(commands.Cog):
         user: Union[discord.Member, discord.User],
         custom_threat: Optional[app_commands.Range[str, 1, None]] = None,
     ):
+        await interaction.response.defer()
         with Session(self.bot.engine) as session:
             # get user settings if they exist
             # returns tuple of (family_friendly, color, block_dms)
@@ -71,7 +72,6 @@ class Dmthreaten(commands.Cog):
         )
 
         try:
-            await interaction.response.defer()
             await channel.send(embed=em)
         except:
             await interaction.followup.send(
