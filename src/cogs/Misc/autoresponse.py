@@ -106,11 +106,7 @@ class Autoresponses(commands.Cog):
                 )
                 return
 
-            key_values = (
-                session.query(Autoresponse.msg, Autoresponse.response)
-                .filter(Autoresponse.server_id == interaction.guild_id)
-                .all()
-            )
+            key_values = self.bot.autoresponses[interaction.guild_id].items()
 
         em, f = self.autoresponse_ui_handler(interaction, key_values)
         if not f:
@@ -155,12 +151,12 @@ class Autoresponses(commands.Cog):
                         server_id=interaction.guild_id, msg=word, response=response
                     )
                 )
+            # update cache
+            self.bot.autoresponses[interaction.guild_id][word] = response
+
             session.commit()
-            key_values = (
-                session.query(Autoresponse.msg, Autoresponse.response)
-                .filter(Autoresponse.server_id == interaction.guild_id)
-                .all()
-            )
+
+            key_values = self.bot.autoresponses[interaction.guild_id].items()
 
         em, f = self.autoresponse_ui_handler(interaction, key_values)
         if not f:
@@ -201,6 +197,8 @@ class Autoresponses(commands.Cog):
                 .filter(Autoresponse.server_id == interaction.guild_id)
                 .all()
             )
+        # update cache
+        del self.bot.autoresponses[interaction.guild_id][word]
 
         em, f = self.autoresponse_ui_handler(interaction, key_values)
         if not f:
@@ -262,6 +260,8 @@ class Autoresponses(commands.Cog):
                 Autoresponse.server_id == interaction.guild_id
             ).delete()
             session.commit()
+        # update cache
+        self.bot.autoresponses[interaction.guild_id].clear()
 
         # UI
         em, _ = self.autoresponse_ui_handler(interaction, [])

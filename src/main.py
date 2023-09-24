@@ -30,12 +30,10 @@ from src.checks import (
     add_users_to_db_wrapped_engine,
     custom_cooldown,
     blacklist_check_wrapped_engine,
-    check_guilds_not_in_db,
 )
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
 
-from db.models import ServerSettings
+from db.models import ServerSettings, Autoresponse
 
 
 # initialize bot
@@ -64,6 +62,19 @@ class Bot(commands.AutoShardedBot):
                     .all()
                 ]
             )
+            raw = (
+                session.query(Autoresponse)
+                .filter(Autoresponse.server_id.in_(self.autoresponse_servers))
+                .all()
+            )
+
+            # map raw[0] which is a server id to a dict of all the autoresponses
+            # acts as a cache
+            self.autoresponses = collections.defaultdict(dict)
+            for autoresponse in raw:
+                self.autoresponses[autoresponse.server_id][
+                    autoresponse.msg
+                ] = autoresponse.response
 
     async def on_ready(self):
         self.curr_guilds = len(self.guilds)

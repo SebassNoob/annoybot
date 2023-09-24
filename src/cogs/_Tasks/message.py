@@ -1,7 +1,4 @@
-import sys
-import asyncio
-import threading
-from asyncio.events import AbstractEventLoop
+from functools import lru_cache
 import random
 import datetime
 
@@ -12,7 +9,7 @@ from discord.ext import commands
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from db.models import Autoresponse, UserServer, Snipe, UserSettings
-from sqlalchemy.engine import Engine
+from utils import HDict
 
 
 class Message(commands.Cog):
@@ -22,22 +19,15 @@ class Message(commands.Cog):
         self.bot = bot
 
     @staticmethod
+    @lru_cache(maxsize=64)
     def handle_autoresponse(
-        loop: AbstractEventLoop, engine: Engine, message: discord.Message
-    ) -> None:
-        with Session(engine) as session:
-            a = (
-                session.query(Autoresponse.msg, Autoresponse.response)
-                .filter(Autoresponse.server_id == message.guild.id)
-                .all()
-            )
-            for msg, response in a:
-                if msg.lower() in message.content.lower():
-                    asyncio.run_coroutine_threadsafe(
-                        message.channel.send(response), loop
-                    )
-
-            sys.exit(0)
+        autoresponses_in_server: dict[str, str], message_content: str
+    ) -> str | None:
+        # server is guaranteed to be in the autoresponse_servers set due to earlier check
+        # if message_content is in the autoresponses dict, return the value else None
+        if not autoresponses_in_server.get(message_content):
+            return None
+        return autoresponses_in_server[message_content]
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
@@ -46,11 +36,12 @@ class Message(commands.Cog):
             and message.guild.id in self.bot.autoresponse_servers
             and not message.author.bot
         ):
-            threading.Thread(
-                target=self.handle_autoresponse,
-                args=(self.bot.loop, self.bot.engine, message),
-                daemon=True,
-            ).start()
+            response = self.handle_autoresponse(
+                HDict(self.bot.autoresponses[message.guild.id]), message.content
+            )
+            if response:
+                await message.channel.send(response)
+                
         if self.bot.user.mention in message.content:
             if "help" in message.content:
                 em = discord.Embed(

@@ -32,5 +32,13 @@ def parse_txt(path: str) -> list[str]:
 async def fetch_json(
     client: ClientSession, path: str, headers: dict[str, str]
 ) -> tuple[dict[Any, Any], int]:
+    """Fetches a json from a path and returns the json and the status code"""
     async with client.get(path, headers=headers) as response:
         return await response.json(), response.status
+
+
+class HDict(dict):
+    """A dict that can be hashed"""
+
+    def __hash__(self):
+        return hash(frozenset(self.items()))
