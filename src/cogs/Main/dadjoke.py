@@ -23,7 +23,7 @@ class Dadjoke(commands.Cog):
             res, status = await fetch_json(
                 session,
                 "https://icanhazdadjoke.com/",
-                headers={"Accept": "application/json"},
+                headers={"Accept": "application/json", "User-Agent": "Heil Spez"},
             )
 
         if status != 200:

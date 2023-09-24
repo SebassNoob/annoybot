@@ -1,6 +1,6 @@
 import csv
 from aiohttp import ClientSession
-from typing import Any
+from typing import Any, Optional
 
 
 def read_csv(path: str, *, as_dict=False) -> list[str] | list[dict[str, str]]:
@@ -24,13 +24,13 @@ def read_csv(path: str, *, as_dict=False) -> list[str] | list[dict[str, str]]:
 
 def parse_txt(path: str) -> list[str]:
     """Reads a txt and returns a list of the lines"""
-    with open(path, "r") as f:
+    with open(path, "r", encoding="utf-8") as f:
         res = [r.replace("\n", "") for r in f.readlines()]
     return res
 
 
 async def fetch_json(
-    client: ClientSession, path: str, headers: dict[str, str]
+    client: ClientSession, path: str, headers: Optional[dict[str, str]] = None
 ) -> tuple[dict[Any, Any], int]:
     """Fetches a json from a path and returns the json and the status code"""
     async with client.get(path, headers=headers) as response:

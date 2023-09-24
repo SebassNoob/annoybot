@@ -41,7 +41,7 @@ class Message(commands.Cog):
             )
             if response:
                 await message.channel.send(response)
-                
+
         if self.bot.user.mention in message.content:
             if "help" in message.content:
                 em = discord.Embed(
@@ -62,8 +62,6 @@ class Message(commands.Cog):
                     "https://memegenerator.net/img/instances/61640131.jpg",
                 ]
                 await message.channel.send(random.choice(angry_responses))
-
-        await self.bot.process_commands(message)
 
     @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message):

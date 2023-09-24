@@ -59,7 +59,9 @@ class Copypasta(commands.Cog):
         sub = "https://www.reddit.com/r/copypasta/new.json?sort=hot"
         async with aiohttp.ClientSession() as session:
             res, status = await fetch_json(
-                session, sub, headers={"Accept": "application/json"}
+                session,
+                sub,
+                headers={"Accept": "application/json", "User-Agent": "Heil Spez"},
             )
 
         if status != 200:
