@@ -105,8 +105,12 @@ class Autoresponses(commands.Cog):
                     ephemeral=True,
                 )
                 return
-
-            key_values = self.bot.autoresponses[interaction.guild_id].items()
+            # guaranteed to be not on -- not stored in cache
+            key_values = (
+                session.query(Autoresponse.msg, Autoresponse.response)
+                .filter(Autoresponse.server_id == interaction.guild_id)
+                .all()
+            )
 
         em, f = self.autoresponse_ui_handler(interaction, key_values)
         if not f:
@@ -151,12 +155,20 @@ class Autoresponses(commands.Cog):
                         server_id=interaction.guild_id, msg=word, response=response
                     )
                 )
-            # update cache
-            self.bot.autoresponses[interaction.guild_id][word] = response
-
             session.commit()
 
-            key_values = self.bot.autoresponses[interaction.guild_id].items()
+            # if cache has the word, add it
+            # only if cache has the server else autoresponse is off
+            if interaction.guild_id in self.bot.autoresponses:
+                self.bot.autoresponses[interaction.guild_id][word] = response
+                key_values = self.bot.autoresponses[interaction.guild_id].items()
+            else:
+                # if off, don't update cache and get from db
+                key_values = (
+                    session.query(Autoresponse.msg, Autoresponse.response)
+                    .filter(Autoresponse.server_id == interaction.guild_id)
+                    .all()
+                )
 
         em, f = self.autoresponse_ui_handler(interaction, key_values)
         if not f:
@@ -192,13 +204,19 @@ class Autoresponses(commands.Cog):
                 Autoresponse.msg == word,
             ).delete()
 
-            key_values = (
-                session.query(Autoresponse.msg, Autoresponse.response)
-                .filter(Autoresponse.server_id == interaction.guild_id)
-                .all()
-            )
-        # update cache
-        del self.bot.autoresponses[interaction.guild_id][word]
+            session.commit()
+
+            # if cache has the word, delete it
+            # only if cache has the server else autoresponse is off
+            if interaction.guild_id in self.bot.autoresponses:
+                del self.bot.autoresponses[interaction.guild_id][word]
+                key_values = self.bot.autoresponses[interaction.guild_id].items()
+            else:
+                key_values = (
+                    session.query(Autoresponse.msg, Autoresponse.response)
+                    .filter(Autoresponse.server_id == interaction.guild_id)
+                    .all()
+                )
 
         em, f = self.autoresponse_ui_handler(interaction, key_values)
         if not f:
@@ -261,7 +279,8 @@ class Autoresponses(commands.Cog):
             ).delete()
             session.commit()
         # update cache
-        self.bot.autoresponses[interaction.guild_id].clear()
+        if interaction.guild_id in self.bot.autoresponses:
+            self.bot.autoresponses[interaction.guild_id].clear()
 
         # UI
         em, _ = self.autoresponse_ui_handler(interaction, [])
