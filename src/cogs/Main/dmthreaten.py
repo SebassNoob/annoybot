@@ -20,9 +20,11 @@ class Dmthreaten(commands.Cog):
 
     @app_commands.command(
         name="dmthreaten",
-        description="Sends a threat to a direct message channel of a user. ",
+        description="Sends a threat to a direct message channel of a user.",
     )
-    @app_commands.describe(user="User to threaten", custom_threat="A custom message")
+    @app_commands.describe(
+        user="User to threaten", custom_threat="A custom message to send to the user."
+    )
     async def dmthreaten(
         self,
         interaction: discord.Interaction,

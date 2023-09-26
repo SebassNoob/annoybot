@@ -17,7 +17,11 @@ class Textwall(commands.Cog):
     @app_commands.command(
         name="textwall", description="Sends a wall of repeated text in a single message"
     )
-    @app_commands.describe(num="The number of times to spam", content="What to spam")
+    @app_commands.describe(
+        num="The number of times to spam",
+        content="What to spam",
+        tts="Whether to use text-to-speech",
+    )
     async def textwall(
         self,
         interaction: discord.Interaction,

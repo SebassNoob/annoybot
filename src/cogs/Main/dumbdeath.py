@@ -25,7 +25,7 @@ class Dumbdeath(commands.Cog):
         name="dumbdeath",
         description="Makes up a fictional scenario where the person you mentioned died a dumb death",
     )
-    @app_commands.describe(user="Someone who will suffer the dumb death")
+    @app_commands.describe(user="The user involved.")
     async def dumbdeath(
         self,
         interaction: discord.Interaction,

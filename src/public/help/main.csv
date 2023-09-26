@@ -1,0 +1,9 @@
+name,description,permissions,user_permissions
+roast (*user),Roast someone.,None,None
+insult (*user),Generates an insult and targets someone.,None,None
+urmom,Generates a 'yo mom' joke.,None,None
+uninspire,Generate an uninspiring quote.,None,None
+dmthreaten (user; *custom_threat),Sends a threat to a direct message channel of a user.,None,None
+dadjoke,Sends a typical dad joke.,None,None
+darkjoke,Sends a dark joke. May be insensitive.,None,None
+dumbdeath (user),Makes up a fictional scenario where the person you mentioned died a dumb death.,None,None

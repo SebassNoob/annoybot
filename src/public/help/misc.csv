@@ -1,0 +1,12 @@
+name,description,permissions,user_permissions
+anime,Sends a pic of an anime woman,None,None,None
+utils pick (arguments),Picks a random option from a list of given words.,None,None
+utils 8ball (question),Gives you a yes/no answer based on a given question,None,None
+autoresponse menu/add/remove/resetdb,Responds to certain keywords guild-wide and sends a message in return.,read_messages,manage_guild
+textwall (num; content; *tts),Sends a wall of text up to 2000 characters.,send_tts_messages,None
+emojitts (length),Reads out loud a long string of emojis,send_tts_messages,None
+meme,Sends a top meme from reddit,None,None
+copypasta,Gets a copypasta from r/copypasta,None,None
+snipe (user),Sends the most recently deleted messaage of a user.,read_message_history,None
+iplookup (ip),Finds the location of a given ip,None,None
+urbandict (term),Looks up a term in urban dictionary,None,None

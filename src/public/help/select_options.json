@@ -1,0 +1,10 @@
+{
+  "Core features": ["Features considered to be the main highlights.", "🌌"],
+  "Trolling": ["Commands that are meant to troll your friends.", "👺"],
+  "Voice": ["Commands used in voice channels to be annoying", "🔊"],
+  "Games": ["Interactive multiplayer games", "🎮"],
+  "Miscellaneous": ["Random features that annoy people", "📦"],
+  "Setup": ["Commands that help you set up the bot", "🛠️"],
+  "Message": ["Commands that modify/change messages", "📨"],
+  "Member": ["Commands that affect members in a server", "👤"]
+}

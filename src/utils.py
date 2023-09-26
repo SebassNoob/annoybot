@@ -1,9 +1,10 @@
 import csv
+import json
 from aiohttp import ClientSession
 from typing import Any, Optional
 
 
-def read_csv(path: str, *, as_dict=False) -> list[str] | list[dict[str, str]]:
+def read_csv(path: str, *, as_dict=False) -> list[tuple[Any]] | list[dict[str, str]]:
     """
     Reads a 2 column csv file and returns a list of dicts with the first column as the key and the second column as the value (no headers)
 
@@ -19,7 +20,14 @@ def read_csv(path: str, *, as_dict=False) -> list[str] | list[dict[str, str]]:
 
         reader = csv.reader(f)
         _ = next(reader)
-        return [(r[0], r[1].replace(";", ",")) for r in reader]
+        return [tuple(map(lambda val: val.replace(";", ","), r)) for r in reader]
+
+
+def read_json(path: str) -> dict[Any, Any]:
+    """Reads a json and returns the dict"""
+    with open(path, "r", encoding="utf-8") as f:
+        res: dict[Any, Any] = json.load(f)
+    return res
 
 
 def parse_txt(path: str) -> list[str]:

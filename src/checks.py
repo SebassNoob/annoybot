@@ -13,8 +13,6 @@ dotenv.load_dotenv(f"{os.getcwd()}/.env")
 
 from db.models import UserServer, UserSettings, ServerSettings
 
-from utils import read_csv
-
 
 # wraps add_users_to_db to pass in the engine
 def add_users_to_db_wrapped_engine(engine: Engine):

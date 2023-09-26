@@ -52,7 +52,7 @@ class Autoresponses(commands.Cog):
 
     autoresponse = app_commands.Group(
         name="autoresponse",
-        description="The bot will respond to a list of predetermined words",
+        description="Responds to certain keywords guild-wide and sends a message in return.",
         guild_only=True,
     )
 
