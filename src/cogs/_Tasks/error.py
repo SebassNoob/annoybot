@@ -24,10 +24,14 @@ class Error(commands.Cog):
                 return
             if isinstance(error, CommandOnCooldown):
                 self.bot.logger.error("Here")
-                em = discord.Embed(color = 0x000000,description = "You have exceeded this command's ratelimits. Try again in **%.1fs** cooldown." % error.retry_after)
+                em = discord.Embed(
+                    color=0x000000,
+                    description="You have exceeded this command's ratelimits. Try again in **%.1fs** cooldown."
+                    % error.retry_after,
+                )
 
-                await interaction.response.send_message(embed= em)
-                return 
+                await interaction.response.send_message(embed=em)
+                return
             if isinstance(error, CheckFailure):
                 # ignore error if blacklist check fails
                 # this check is after commandoncooldown because it inherits from checkfailure

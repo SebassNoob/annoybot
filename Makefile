@@ -8,6 +8,7 @@ ifeq ($(version),)
 	DC_CMD := docker compose -f docker-compose.dev.yml
 else
 	DC_CMD := docker compose -f docker-compose.$(version).yml
+	tag := --$(version)
 endif
 
 run:
@@ -21,13 +22,13 @@ migrate:
 	alembic upgrade head
 
 init_db:
-	python db/init_db.py init
+	python db/init_db.py init $(tag)
 
 drop_db:
-	python db/init_db.py drop
+	python db/init_db.py drop $(tag)
 
 test_db:
-	python db/init_db.py test
+	python db/init_db.py test $(tag)
 
 black:
 	black ./src
