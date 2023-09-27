@@ -29,8 +29,8 @@ def add_users_to_db_wrapped_engine(engine: Engine):
                     userserver_present = (
                         session.query(UserServer)
                         .filter(
-                            UserServer.user_id == interaction.user.id
-                            or UserServer.server_id == interaction.guild.id
+                            (UserServer.user_id == interaction.user.id)
+                            & (UserServer.server_id == interaction.guild.id)
                         )
                         .all()
                     )
@@ -77,8 +77,8 @@ def blacklist_check_wrapped_engine(engine: Engine):
                 userserver = (
                     session.query(UserServer)
                     .filter(
-                        UserServer.user_id == interaction.user.id
-                        or UserServer.server_id == interaction.guild.id
+                        (UserServer.user_id == interaction.user.id)
+                        & (UserServer.server_id == interaction.guild.id)
                     )
                     .one()
                 )

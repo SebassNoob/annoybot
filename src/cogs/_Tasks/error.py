@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
+from discord.app_commands.errors import CheckFailure
 
 from sqlalchemy.exc import IntegrityError
 
@@ -20,6 +21,8 @@ class Error(commands.Cog):
                 # shit db is fucked in the head
 
                 self.bot.logger.error(error)
+                return
+            elif isinstance(error, CheckFailure):
                 return
             else:
                 em = discord.Embed(

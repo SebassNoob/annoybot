@@ -3,10 +3,6 @@ from discord.ext import commands
 from discord import app_commands
 from src.utils import read_csv, read_json
 import os
-import asyncio
-
-from sqlalchemy.orm import Session
-from db.models import UserSettings
 
 
 class HelpOptions(discord.ui.Select):
@@ -29,7 +25,7 @@ class HelpOptions(discord.ui.Select):
 
 
 class Help(commands.Cog):
-    """Shows general information and support links."""
+    """Shows a help menu with all the commands"""
 
     def __init__(self, bot):
         self.bot = bot

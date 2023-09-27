@@ -2,6 +2,13 @@ import csv
 import json
 from aiohttp import ClientSession
 from typing import Any, Optional
+import discord
+
+from sqlalchemy import Engine
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+
+from db.models import UserServer, UserSettings, ServerSettings, Autoresponse
 
 
 def read_csv(path: str, *, as_dict=False) -> list[tuple[Any]] | list[dict[str, str]]:
@@ -50,3 +57,32 @@ class HDict(dict):
 
     def __hash__(self):
         return hash(frozenset(self.items()))
+
+
+def add_user(
+    user: discord.User | discord.Member, engine: Engine, with_server: bool = True
+):
+    """Adds a user to the database. WARNING: This assumes the user is not in the database already"""
+    with Session(engine) as session:
+        try:
+            session.add(
+                UserSettings(
+                    id=user.id,
+                    color="000000",
+                    family_friendly=False,
+                    sniped=True,
+                    block_dms=False,
+                )
+            )
+            if with_server:
+                session.add(
+                    UserServer(
+                        user_id=user.id,
+                        server_id=user.guild.id,
+                        blacklist=False,
+                    )
+                )
+            session.commit()
+        except IntegrityError as e:
+            session.rollback()
+            raise Exception(e)
