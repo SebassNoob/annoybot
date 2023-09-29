@@ -15,21 +15,7 @@ services:
       - ./src:/app/src
     restart: always
     depends_on:
-      - db
       - redis
-  db:
-    container_name: db
-    image: ghcr.io/libsql/sqld:main
-    networks:
-      - annoybot-network
-    env_file:
-      - .env
-      - .env.local
-    volumes:
-      - ./db/local.db:/var/lib/sqld
-    restart: always
-    ports:
-      - 8080:8080
   redis:
     container_name: redis
     build: 
@@ -37,8 +23,6 @@ services:
     networks:
       - annoybot-network
     restart: always
-    depends_on:
-      - db
     ports:
       - 6379:6379
 

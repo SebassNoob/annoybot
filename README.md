@@ -2,7 +2,7 @@
 
 This is the 2.0 rewrite for annoybot. ([<= 1.9.0 repo](https://github.com/SebassNoob/bot))
 
-Built with discord.py and Turso.
+Built with discord.py, Redis and Turso.
 
 ## About
 A discord.py bot primarily used to annoy your friends, harmlessly.
@@ -13,28 +13,49 @@ Highlights (Most used)
 - playnoise: play a stupid noise into your voice channel
 - autoresponse: automatically respond to certain keywords
 - ratio: produces a classic twitter ratio to ratio your friends
-- And so much more! We have games, trolling, memes, dark jokes, we have it all!
+- And so much more! We have games, trolling, memes, dark jokes, it's all here!
 
 Why wait? Piss your friends off now!
 
+### Architecture
+
+DONE:
+- Automatically sharded bot on the server
+- Turso primary db (sin)
+
+TODO:
+- Redis caching on local machine
+- Replication to secondary
+
+
 ## Setup
-Requirements:
+
+### Requirements:
 ```
-docker && docker compose
+docker
 GNU Make
+alembic
+
+# optional 
+python (venv)
+pip
 ```
 
-Pre-run:
+### Setup:
 
-- Create a file named ``.env.local`` and set ``TOKEN=your_token``
+- Rename ``.env.local.example`` to ``.env.local``
+- Set the required values (If you need to deploy to prod)
+- Run ``make init_db`` 
 
-Run:
+### Run:
 ```sh
-source venv/bin/activate || venv\Scripts\activate # (macOS/linux OR windows)
-make run
-make init_db # skip if db is initialised already
+# optional: activate venv to isolate python env
+source venv/bin/activate || venv\Scripts\activate # (macOS/linux || windows)
+make run # docker compose down and up
 make migrate # handles alembic upgrades
 ```
+
+### Misc commands
 format: ``make black`` :)
 
 alembic revision: ``alembic revision -m "my_revision"``
