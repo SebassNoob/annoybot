@@ -25,15 +25,17 @@ from logging.handlers import TimedRotatingFileHandler
 # add parent directory to path
 sys.path.insert(1, os.getcwd())
 from db.client import make_engine
+from db.models import ServerSettings, Autoresponse
 
 from src.checks import (
     add_users_to_db_wrapped_engine,
     custom_cooldown,
     blacklist_check_wrapped_engine,
 )
+
 from sqlalchemy.orm import Session
 
-from db.models import ServerSettings, Autoresponse
+from db.cache import get_redis
 
 
 # initialize bot
@@ -51,6 +53,21 @@ class Bot(commands.AutoShardedBot):
         # if env is PROD, use the production database, else use the development database
         loc = os.getenv("PROD_DB_LOC") if PROD else os.getenv("DEV_DB_LOC")
         self.engine = make_engine(loc=loc)
+
+        # connect to redis with the appropriate uri and port
+        redis_uri = os.getenv("PROD_CACHE_URI") if PROD else os.getenv("DEV_CACHE_URI")
+        redis_port = (
+            int(os.getenv("PROD_CACHE_PORT"))
+            if PROD
+            else int(os.getenv("DEV_CACHE_PORT"))
+        )
+        retry = True if PROD else False
+
+        self.redis_client = get_redis(redis_uri, redis_port, retry_on_error=retry)
+
+        # block until redis is ready
+        self.redis_client.block_until_ready(check_interval=0.2, logger=self.logger)
+
         self.curr_guilds = 0
 
         with Session(self.engine) as session:

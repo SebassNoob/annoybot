@@ -8,7 +8,7 @@ from discord.ext import commands
 
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from db.models import Autoresponse, UserServer, Snipe, UserSettings
+from db.models import UserServer, Snipe, UserSettings
 from utils import HDict
 
 
@@ -25,17 +25,15 @@ class Message(commands.Cog):
     ) -> str | None:
         # server is guaranteed to be in the autoresponse_servers set due to earlier check
         # if message_content is in the autoresponses dict, return the value else None
-        if not autoresponses_in_server.get(message_content):
-            return None
-        return autoresponses_in_server[message_content]
+        return autoresponses_in_server.get(message_content)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
         if (
             message
+            and not message.author.bot
             and message.guild
             and message.guild.id in self.bot.autoresponse_servers
-            and not message.author.bot
         ):
             response = self.handle_autoresponse(
                 HDict(self.bot.autoresponses[message.guild.id]), message.content

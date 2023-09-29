@@ -17,6 +17,7 @@ services:
     restart: unless-stopped
     depends_on:
       - db
+      - redis
   db:
     container_name: db
     image: ghcr.io/libsql/sqld:main
@@ -30,6 +31,17 @@ services:
     restart: unless-stopped
     ports:
       - 8080:8080
+  redis:
+    container_name: redis
+    build: 
+      dockerfile: redis.Dockerfile
+    networks:
+      - annoybot-network
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - 6379:6379
 
 networks:
   annoybot-network:
