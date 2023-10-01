@@ -44,8 +44,8 @@ pip
 ### Setup:
 
 - Rename ``.env.local.example`` to ``.env.local``
-- Set the required values (If you need to deploy to prod)
-- Run ``make init_db`` 
+- Set the required values
+- Run ``make migrate`` (Alembic, preferred) or ``make init_db`` (manual)
 
 ### Run:
 ```sh
@@ -58,4 +58,6 @@ make migrate # handles alembic upgrades
 ### Misc commands
 format: ``make black`` :)
 
-alembic revision: ``alembic revision -m "my_revision"``
+alembic revision: 
+
+make changes to the ``db/models/`` directory. Once done, run ``make revise`` (Doing ``alembic revision -m "..."`` will not work with libsql) to autogenerate a revision with alembic.

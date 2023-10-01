@@ -11,16 +11,22 @@ else
 	tag := --$(version)
 endif
 
+# docker-compose
 run:
 	$(DC_CMD) -v down
 	$(DC_CMD) up -d --build
 
 down:
 	$(DC_CMD) -v down
-	
-migrate:
-	alembic upgrade head
 
+# alembic
+migrate:
+	bash scripts/alembic_migrate.sh $(tag)
+
+revise:
+	bash scripts/alembic_revision.sh $(name)
+
+# misc commands to init and drop db manually
 init_db:
 	python db/init_db.py init $(tag)
 
@@ -30,6 +36,7 @@ drop_db:
 test_db:
 	python db/init_db.py test $(tag)
 
+# black formatter
 black:
 	black ./src
 	black ./db
