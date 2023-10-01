@@ -3,11 +3,8 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 import random
-from src.utils import parse_txt
+from src.utils import parse_txt, check_usersettings_cache
 from better_profanity import profanity
-
-from sqlalchemy.orm import Session
-from db.models import UserSettings
 
 
 class Uninspire(commands.Cog):
@@ -21,14 +18,15 @@ class Uninspire(commands.Cog):
     async def uninspire(self, interaction: discord.Interaction):
         quote = random.choice(self.quotes)
 
-        with Session(self.bot.engine) as session:
-            ff, color = (
-                session.query(UserSettings.family_friendly, UserSettings.color)
-                .filter(UserSettings.id == interaction.user.id)
-                .one()
-            )
-            if ff:
-                quote = profanity.censor(quote)
+        ff, color = check_usersettings_cache(
+            user=interaction.user,
+            columns=["family_friendly", "color"],
+            engine=self.bot.engine,
+            redis_client=self.bot.redis_client,
+        )
+
+        if ff:
+            quote = profanity.censor(quote)
 
         embed = discord.Embed(color=int(color, 16), description=quote)
         embed.set_footer(

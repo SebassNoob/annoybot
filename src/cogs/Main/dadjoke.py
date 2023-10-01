@@ -1,11 +1,9 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord import app_commands
 from better_profanity import profanity
 
-from sqlalchemy.orm import Session
-from db.models import UserSettings
-from src.utils import fetch_json
+from src.utils import fetch_json, check_usersettings_cache
 
 import aiohttp
 
@@ -15,6 +13,7 @@ class Dadjoke(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.fetch_dadjokes.start()
 
     @app_commands.command(name="dadjoke", description="Sends a typical dad joke.")
     async def dadjoke(self, interaction: discord.Interaction):
@@ -23,25 +22,26 @@ class Dadjoke(commands.Cog):
             res, status = await fetch_json(
                 session,
                 "https://icanhazdadjoke.com/",
-                headers={"Accept": "application/json", "User-Agent": "Heil Spez"},
+                headers={
+                    "Accept": "application/json",
+                    "User-Agent": "annoybot -- contact: sebassnoob on discord",
+                },
             )
 
         if status != 200:
-            await interaction.response.send_message(
-                content="❌ There was an error with the dad joke API. Try again later.",
-                ephemeral=True,
-            )
-            return
-
-        dadJoke = res["joke"]
-        with Session(self.bot.engine) as session:
-            ff, color = (
-                session.query(UserSettings.family_friendly, UserSettings.color)
-                .filter(UserSettings.id == interaction.user.id)
-                .one()
-            )
-            if ff:
-                dadJoke = profanity.censor(dadJoke)
+            # get from cache instead
+            dadJoke = self.bot.redis_client.srandmember("dadjokes")
+        else:
+            # successful, get from api
+            dadJoke = res["joke"]
+        ff, color = check_usersettings_cache(
+            user=interaction.user,
+            columns=["family_friendly", "color"],
+            engine=self.bot.engine,
+            redis_client=self.bot.redis_client,
+        )
+        if ff:
+            dadJoke = profanity.censor(dadJoke)
 
         em = discord.Embed(color=int(color, 16), description=dadJoke)
         em.set_author(
@@ -50,6 +50,26 @@ class Dadjoke(commands.Cog):
         )
 
         await interaction.followup.send(embed=em)
+
+    @tasks.loop(hours=1)
+    async def fetch_dadjokes(self):
+        async with aiohttp.ClientSession() as session:
+            res, status = await fetch_json(
+                session,
+                "https://icanhazdadjoke.com/search",
+                headers={
+                    "Accept": "application/json",
+                    "User-Agent": "annoybot -- contact: sebassnoob on discord",
+                },
+            )
+        if status != 200:
+            self.bot.logger.warning(
+                f"failed to fetch dad jokes from https://icanhazdadjoke.com/search: {status}"
+            )
+            return
+        results = res["results"]
+        jokes = [i["joke"] for i in results]
+        self.bot.redis_client.sadd("dadjokes", *jokes)
 
 
 async def setup(bot):

@@ -4,11 +4,8 @@ from discord.ext import commands
 from discord import app_commands
 from typing import Optional, Union
 import random
-from src.utils import parse_txt
+from src.utils import parse_txt, check_usersettings_cache
 from better_profanity import profanity
-
-from sqlalchemy.orm import Session
-from db.models import UserSettings
 
 
 class Insult(commands.Cog):
@@ -35,15 +32,15 @@ class Insult(commands.Cog):
         user: Optional[Union[discord.Member, discord.User]] = None,
     ):
         insult = f"{random.choice(self.sentence_starters)} {random.choice(self.adjectives)} {random.choice(self.insults)}!"
+        ff, color = check_usersettings_cache(
+            user=interaction.user,
+            columns=["family_friendly", "color"],
+            engine=self.bot.engine,
+            redis_client=self.bot.redis_client,
+        )
 
-        with Session(self.bot.engine) as session:
-            ff, color = (
-                session.query(UserSettings.family_friendly, UserSettings.color)
-                .filter(UserSettings.id == interaction.user.id)
-                .one()
-            )
-            if ff:
-                insult = profanity.censor(insult)
+        if ff:
+            insult = profanity.censor(insult)
         embed = discord.Embed(color=int(color, 16), description=insult)
 
         embed.set_footer(text=f"Requested by {interaction.user.display_name}")

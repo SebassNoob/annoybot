@@ -1,11 +1,8 @@
-from typing import Any, Coroutine
 import discord
 from discord.ext import commands, tasks
 from discord import app_commands
 
-from sqlalchemy.orm import Session
-from db.models import UserSettings
-from src.utils import fetch_json
+from src.utils import fetch_json, check_usersettings_cache
 
 import random
 
@@ -18,9 +15,6 @@ class Copypasta(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        # a list of copypastas (title, selftext)
-        self.copypastas = []
-
         self.get_copypastas.clear_exception_types()
         self.get_copypastas.start()
 
@@ -28,22 +22,23 @@ class Copypasta(commands.Cog):
         name="copypasta", description="Gets a copypasta from r/copypasta"
     )
     async def copypasta(self, interaction: discord.Interaction):
-        with Session(self.bot.engine) as session:
-            color = (
-                session.query(UserSettings.color)
-                .filter(UserSettings.id == interaction.user.id)
-                .one()
-            )[0]
+        color = check_usersettings_cache(
+            user=interaction.user,
+            columns=["color"],
+            engine=self.bot.engine,
+            redis_client=self.bot.redis_client,
+        )[0]
 
-        if len(self.copypastas) == 0:
-            await interaction.followup.send(
+        if self.bot.redis_client.hlen("copypastas") == 0:
+            await interaction.response.send_message(
                 content="❌ There was an error with the copypasta API. Try again later.",
                 ephemeral=True,
             )
             return
 
-        title, desc = random.choice(self.copypastas)
-
+        title, desc = self.bot.redis_client.hrandfield(
+            "copypastas", count=1, withvalues=True
+        )
         embed = discord.Embed(color=int(color, 16), title=title, description=desc)
 
         await interaction.response.send_message(
@@ -75,14 +70,15 @@ class Copypasta(commands.Cog):
             self.get_copypastas.change_interval(minutes=30.0)
 
             # parse the response
-            # this is a list of (title, selftext)
+            # this is a dict with title: selftext
             # we only want copypastas that are less than 4000 characters
 
-            self.copypastas = [
-                (i["data"]["title"], i["data"]["selftext"])
+            copypastas = {
+                i["data"]["title"]: i["data"]["selftext"]
                 for i in res["data"]["children"]
                 if 0 < len(i["data"]["selftext"]) <= 4000
-            ]
+            }
+            self.bot.redis_client.hmset("copypastas", copypastas)
 
         except KeyError:
             self.bot.logger.warning(f"failed to parse response from {sub}: {status}")

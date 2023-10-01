@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from better_profanity import profanity
-
+from src.utils import check_usersettings_cache
 from sqlalchemy.orm import Session
 from db.models import UserSettings, Snipe
 
@@ -68,14 +68,13 @@ class Snipes(commands.Cog):
                 )
                 return
 
-            ff, color = (
-                session.query(
-                    UserSettings.family_friendly,
-                    UserSettings.color,
-                )
-                .filter(UserSettings.id == interaction.user.id)
-                .one()
+            ff, color = check_usersettings_cache(
+                user=interaction.user,
+                columns=["family_friendly", "color"],
+                engine=self.bot.engine,
+                redis_client=self.bot.redis_client,
             )
+
         if ff:
             message = profanity.censor(message)
 

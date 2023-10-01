@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
-from better_profanity import profanity
+from src.utils import check_usersettings_cache
 from typing import Optional
 import io
 
@@ -68,12 +68,13 @@ class Autoresponses(commands.Cog):
             )
 
         f = discord.File(io.StringIO(desc), "table.txt") if len(desc) > 4000 else None
-        with Session(self.bot.engine) as session:
-            color = (
-                session.query(UserSettings.color)
-                .filter(UserSettings.id == interaction.user.id)
-                .one()
-            )[0]
+
+        color = check_usersettings_cache(
+            user=interaction.user,
+            columns=["color"],
+            engine=self.bot.engine,
+            redis_client=self.bot.redis_client,
+        )[0]
 
         em = discord.Embed(
             color=int(color, 16),

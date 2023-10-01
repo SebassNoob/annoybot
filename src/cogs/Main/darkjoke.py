@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 import random
-from src.utils import parse_txt
+from src.utils import parse_txt, check_usersettings_cache
 from better_profanity import profanity
 
 from sqlalchemy.orm import Session
@@ -23,14 +23,15 @@ class Darkjoke(commands.Cog):
     async def darkjoke(self, interaction: discord.Interaction):
         joke = random.choice(self.jokes)
 
-        with Session(self.bot.engine) as session:
-            ff, color = (
-                session.query(UserSettings.family_friendly, UserSettings.color)
-                .filter(UserSettings.id == interaction.user.id)
-                .one()
-            )
-            if ff:
-                joke = profanity.censor(joke)
+        ff, color = check_usersettings_cache(
+            user=interaction.user,
+            columns=["family_friendly", "color"],
+            engine=self.bot.engine,
+            redis_client=self.bot.redis_client,
+        )
+
+        if ff:
+            joke = profanity.censor(joke)
 
         await interaction.response.send_message(
             embed=discord.Embed(color=int(color, 16), description=joke)

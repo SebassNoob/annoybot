@@ -3,9 +3,7 @@ from discord.ext import commands
 from discord import app_commands
 
 import aiohttp
-from src.utils import fetch_json
-from sqlalchemy.orm import Session
-from db.models import UserSettings
+from src.utils import fetch_json, check_usersettings_cache
 
 
 class Urbandict(commands.Cog):
@@ -40,12 +38,12 @@ class Urbandict(commands.Cog):
         definition = best["definition"].replace("[", "").replace("]", "")
         example = best["example"].replace("[", "").replace("]", "")
 
-        with Session(self.bot.engine) as session:
-            color = (
-                session.query(UserSettings.color)
-                .filter(UserSettings.id == interaction.user.id)
-                .one()
-            )[0]
+        color = check_usersettings_cache(
+            user=interaction.user,
+            columns=["color"],
+            engine=self.bot.engine,
+            redis_client=self.bot.redis_client,
+        )[0]
 
         description = f"**Definition:** {definition} \n\n **Examples:** {example}"
         em = discord.Embed(

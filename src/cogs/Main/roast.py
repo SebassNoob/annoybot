@@ -4,11 +4,8 @@ from discord.ext import commands
 from discord import app_commands
 from typing import Optional, Union
 import random
-from src.utils import parse_txt
+from src.utils import parse_txt, check_usersettings_cache
 from better_profanity import profanity
-
-from sqlalchemy.orm import Session
-from db.models import UserSettings
 
 
 class Roast(commands.Cog):
@@ -26,26 +23,26 @@ class Roast(commands.Cog):
         user: Optional[Union[discord.Member, discord.User]] = None,
     ):
         roast = random.choice(self.roasts)
+        ff, color = check_usersettings_cache(
+            user=interaction.user,
+            columns=["family_friendly", "color"],
+            engine=self.bot.engine,
+            redis_client=self.bot.redis_client,
+        )
 
-        with Session(self.bot.engine) as session:
-            ff, color = (
-                session.query(UserSettings.family_friendly, UserSettings.color)
-                .filter(UserSettings.id == interaction.user.id)
-                .one()
-            )
-            if ff:
-                roast = profanity.censor(roast)
+        if ff:
+            roast = profanity.censor(roast)
 
-        embedVar = discord.Embed(color=int(color, 16), description=roast)
-        embedVar.set_author(
+        em = discord.Embed(color=int(color, 16), description=roast)
+        em.set_author(
             name=f"Roast from {interaction.user.display_name}",
             icon_url=interaction.user.display_avatar,
         )
 
-        embedVar.set_footer(text="u suck")
+        em.set_footer(text="u suck")
 
         await interaction.response.send_message(
-            content=user.mention if user else "", embed=embedVar
+            content=user.mention if user else "", embed=em
         )
 
 

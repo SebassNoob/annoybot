@@ -4,7 +4,7 @@ from discord import app_commands
 
 from sqlalchemy.orm import Session
 from db.models import UserSettings
-from src.utils import fetch_json
+from src.utils import fetch_json, check_usersettings_cache
 
 import random
 from itertools import cycle
@@ -34,37 +34,39 @@ class Meme(commands.Cog):
         self.get_all_memes.clear_exception_types()
         self.get_all_memes.start()
 
-        # this is a dict of subreddits mapped to a list of memes. each meme is a tuple of (title, url)
-        self.meme_data = defaultdict(list)
-
         # start the loop to refresh memes every 2 minutes
         self.get_memes.clear_exception_types()
         self.get_memes.start()
 
     @app_commands.command(name="meme", description="Sends a top meme from reddit")
     async def meme(self, interaction: discord.Interaction):
-        with Session(self.bot.engine) as session:
-            color = (
-                session.query(UserSettings.color)
-                .filter(UserSettings.id == interaction.user.id)
-                .one()
-            )[0]
+        color = check_usersettings_cache(
+            user=interaction.user,
+            columns=["color"],
+            engine=self.bot.engine,
+            redis_client=self.bot.redis_client,
+        )[0]
 
-        if len(self.meme_data.items()) == 0:
-            await interaction.followup.send(
+        scanned_keys = self.bot.redis_client.scan(cursor=0, match="memes:*")
+        if len(scanned_keys) == 0:
+            await interaction.response.send_message(
                 content="❌ There was an error with the meme API. Try again later.",
                 ephemeral=True,
             )
             return
+        rand_key = random.choice(scanned_keys[1])
+        title, url = self.bot.redis_client.hrandfield(
+            rand_key, count=1, withvalues=True
+        )
 
-        sub, data = random.choice(list(self.meme_data.items()))
-        specific_meme = random.choice(data)
+        embed = discord.Embed(color=int(color, 16), title=title)
 
-        embed = discord.Embed(color=int(color, 16), title=specific_meme[0])
+        embed.set_image(url=url)
 
-        embed.set_image(url=specific_meme[1])
-
-        await interaction.response.send_message(content=f"source: {sub}", embed=embed)
+        # remove the "memes:" part of the key with string slicing [6:]
+        await interaction.response.send_message(
+            content=f"source: {rand_key[6:]}", embed=embed
+        )
 
     def cog_unload(self):
         self.get_memes.cancel()
@@ -86,10 +88,14 @@ class Meme(commands.Cog):
 
                 try:
                     # parse the response
-                    self.meme_data[sub] = [
-                        (i["data"]["title"], i["data"]["url"])
+                    meme_data = defaultdict(dict)
+                    meme_data[sub] = {
+                        i["data"]["title"]: i["data"]["url"]
                         for i in res["data"]["children"]
-                    ]
+                    }
+                    for sub, data in meme_data.items():
+                        self.bot.redis_client.hmset(f"memes:{sub}", data)
+
                 except KeyError:
                     self.bot.logger.warning(
                         f"failed to parse response from {sub}: {status}"
@@ -117,12 +123,16 @@ class Meme(commands.Cog):
             self.get_memes.change_interval(minutes=2.0)
 
             # parse the response
+            # this is a dict with title: url
+            # set meme:subreddit to this dict
+            meme_data = {
+                i["data"]["title"]: i["data"]["url"] for i in res["data"]["children"]
+            }
 
-            self.meme_data[sub] = [
-                (i["data"]["title"], i["data"]["url"]) for i in res["data"]["children"]
-            ]
+            self.bot.redis_client.hmset(f"memes:{sub}", meme_data)
+
         except KeyError:
-            self.bot.logger.warning(f"failed to parse response from {sub}: {status}")
+            self.bot.logger.warning(f"failed to parse response from {sub}: {res}")
         except Exception as e:
             self.bot.logger.error(e)
         return

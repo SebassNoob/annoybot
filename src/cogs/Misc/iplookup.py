@@ -2,9 +2,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 
-from sqlalchemy.orm import Session
-from db.models import UserSettings
-from src.utils import fetch_json
+from src.utils import fetch_json, check_usersettings_cache
 
 import aiohttp
 
@@ -26,12 +24,12 @@ class Iplookup(commands.Cog):
                 session,
                 f"http://ip-api.com/json/{ip}",
             )
-        with Session(self.bot.engine) as session:
-            color = (
-                session.query(UserSettings.color)
-                .filter(UserSettings.id == interaction.user.id)
-                .one()
-            )[0]
+        color = check_usersettings_cache(
+            user=interaction.user,
+            columns=["color"],
+            engine=self.bot.engine,
+            redis_client=self.bot.redis_client,
+        )[0]
 
         if status != 200:
             await interaction.response.send_message(

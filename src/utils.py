@@ -1,7 +1,7 @@
 import csv
 import json
 from aiohttp import ClientSession
-from typing import Any, Optional
+from typing import Any, Optional, Literal
 import discord
 
 from sqlalchemy import Engine
@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
 from db.models import UserServer, UserSettings, ServerSettings, Autoresponse
+import redis
 
 
 def read_csv(path: str, *, as_dict=False) -> list[tuple[Any]] | list[dict[str, str]]:
@@ -86,3 +87,41 @@ def add_user(
         except IntegrityError as e:
             session.rollback()
             raise Exception(e)
+
+
+def check_usersettings_cache(
+    *,
+    user: discord.User | discord.Member,
+    columns: list[Literal["id", "color", "family_friendly", "sniped", "block_dms"]],
+    engine: Engine,
+    redis_client: redis.Redis,
+) -> tuple[Any]:
+    """Checks if a user is in the cache. columns is a tuple of the columns in usersettings to check"""
+    key = f"usersettings:{user.id}"
+    res = redis_client.hmget(key, columns)
+    if not all(res):
+        # if not all columns are in the cache, get them from the db
+        with Session(engine) as session:
+            raw = session.query(UserSettings).filter(UserSettings.id == user.id).one()
+
+            # add to cache
+            redis_client.hmset(
+                key,
+                {
+                    "id": raw.id,
+                    "color": raw.color,
+                    "family_friendly": str(raw.family_friendly),
+                    "sniped": str(raw.sniped),
+                    "block_dms": str(raw.block_dms),
+                },
+            )
+            redis_client.expire(key, 60 * 30)  # expire after 30 minutes
+        # return the columns from the db
+        res = [getattr(raw, col) for col in columns]
+    else:
+        # parse bools which are stored as strings
+        for idx, val in enumerate(res):
+            if val in ("True", "False"):
+                res[idx] = True if val == "True" else False
+
+    return res

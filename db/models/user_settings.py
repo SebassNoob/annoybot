@@ -15,4 +15,4 @@ class UserSettings(Base):
     block_dms: Mapped[bool] = mapped_column(Boolean)
 
     def __repr__(self) -> str:
-        return f"User(id={self.id!r}, msg={self.msg!r})"
+        return f"User(id={self.id!r}, color={self.color!r}, family_friendly={self.family_friendly!r}, sniped={self.sniped!r}, block_dms={self.block_dms!r})"

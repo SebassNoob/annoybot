@@ -4,11 +4,8 @@ from discord.ext import commands
 from discord import app_commands
 from typing import Union
 import random
-from src.utils import read_csv
+from src.utils import read_csv, check_usersettings_cache
 from better_profanity import profanity
-
-from sqlalchemy.orm import Session
-from db.models import UserSettings
 
 
 class Dumbdeath(commands.Cog):
@@ -42,19 +39,21 @@ class Dumbdeath(commands.Cog):
             # else filter
 
         deaths = self.deaths
-        print(deaths, nsfw)
+
         if nsfw:
             deaths = list(filter(lambda item: item["nsfw"] == "0", deaths))
 
         choice = random.choice(deaths)["content"]
-        with Session(self.bot.engine) as session:
-            ff, color = (
-                session.query(UserSettings.family_friendly, UserSettings.color)
-                .filter(UserSettings.id == interaction.user.id)
-                .one()
-            )
-            if ff:
-                choice = profanity.censor(choice)
+
+        ff, color = check_usersettings_cache(
+            user=interaction.user,
+            columns=["family_friendly", "color"],
+            engine=self.bot.engine,
+            redis_client=self.bot.redis_client,
+        )
+
+        if ff:
+            choice = profanity.censor(choice)
 
         em = discord.Embed(
             color=int(color, 16), description=choice.replace("#", user.name)

@@ -3,11 +3,8 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 import random
-from src.utils import parse_txt
+from src.utils import parse_txt, check_usersettings_cache
 from better_profanity import profanity
-
-from sqlalchemy.orm import Session
-from db.models import UserSettings
 
 
 class Utils(commands.Cog):
@@ -34,14 +31,15 @@ class Utils(commands.Cog):
         choice = random.choice([arg.strip() for arg in arguments.split(",")]) or " "
         random_insult = random.choice(self.insults)
 
-        with Session(self.bot.engine) as session:
-            ff = (
-                session.query(UserSettings.family_friendly)
-                .filter(UserSettings.id == interaction.user.id)
-                .one()
-            )
-            if ff[0]:
-                random_insult = profanity.censor(random_insult)
+        ff = check_usersettings_cache(
+            user=interaction.user,
+            columns=["family_friendly"],
+            engine=self.bot.engine,
+            redis_client=self.bot.redis_client,
+        )
+
+        if ff[0]:
+            random_insult = profanity.censor(random_insult)
 
         await interaction.response.send_message(
             f"{interaction.user.mention}\nI pick ``{choice}``, you indecisive {random_insult}."
@@ -58,14 +56,15 @@ class Utils(commands.Cog):
     ):
         prediction = random.choice(self.predict_res)
 
-        with Session(self.bot.engine) as session:
-            ff, color = (
-                session.query(UserSettings.family_friendly, UserSettings.color)
-                .filter(UserSettings.id == interaction.user.id)
-                .one()
-            )
-            if ff:
-                prediction = profanity.censor(prediction)
+        ff, color = check_usersettings_cache(
+            user=interaction.user,
+            columns=["family_friendly", "color"],
+            engine=self.bot.engine,
+            redis_client=self.bot.redis_client,
+        )
+
+        if ff:
+            prediction = profanity.censor(prediction)
 
         em = discord.Embed(color=int(color, 16), title=question, description=prediction)
 
