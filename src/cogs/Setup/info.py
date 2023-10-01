@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
-from src.utils import parse_txt
+from src.utils import parse_txt, check_usersettings_cache
 import os
 import asyncio
 
@@ -126,12 +126,12 @@ class Info(commands.Cog):
     async def credit(self, interaction: discord.Interaction):
         guilds = str(len(self.bot.guilds))
 
-        with Session(self.bot.engine) as session:
-            color = (
-                session.query(UserSettings.color)
-                .filter(UserSettings.id == interaction.user.id)
-                .one()
-            )[0]
+        color = check_usersettings_cache(
+            user=interaction.user,
+            columns=["color"],
+            engine=self.bot.engine,
+            redis_client=self.bot.redis_client,
+        )[0]
 
         em = discord.Embed(color=int(color, 16))
         em.add_field(

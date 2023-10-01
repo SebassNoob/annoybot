@@ -45,7 +45,7 @@ class Urbandict(commands.Cog):
             redis_client=self.bot.redis_client,
         )[0]
 
-        description = f"**Definition:** {definition} \n\n **Examples:** {example}"
+        description = f"**Definition:** {definition}\n\n**Examples:** {example}"
         em = discord.Embed(
             color=int(color, 16),
             title=f"Urban Dictionary result for {term}",

@@ -7,7 +7,7 @@ import asyncio
 from sqlalchemy.orm import Session
 from db.models import ServerSettings, UserServer, UserSettings, Autoresponse
 
-from src.utils import add_user
+from src.utils import add_user, check_usersettings_cache
 
 
 class Serversettings(commands.Cog):
@@ -40,11 +40,12 @@ class Serversettings(commands.Cog):
                 )
                 .all()
             )
-            color = (
-                session.query(UserSettings.color)
-                .filter(UserSettings.id == interaction.user.id)
-                .one()
-            )[0]
+        color = check_usersettings_cache(
+            user=interaction.user,
+            columns=["color"],
+            engine=self.bot.engine,
+            redis_client=self.bot.redis_client,
+        )[0]
 
         blacklist_ids = [x[0] for x in blacklist]
         blacklist = await asyncio.gather(
