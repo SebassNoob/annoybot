@@ -95,7 +95,7 @@ def check_usersettings_cache(
     columns: list[Literal["id", "color", "family_friendly", "sniped", "block_dms"]],
     engine: Engine,
     redis_client: redis.Redis,
-) -> tuple[Any]:
+) -> list[Any]:
     """Checks if a user is in the cache. columns is a tuple of the columns in usersettings to check"""
     key = f"usersettings:{user.id}"
     res = redis_client.hmget(key, columns)
@@ -105,9 +105,9 @@ def check_usersettings_cache(
             raw = session.query(UserSettings).filter(UserSettings.id == user.id).one()
 
             # add to cache
-            redis_client.hmset(
+            redis_client.hset(
                 key,
-                {
+                mapping={
                     "id": raw.id,
                     "color": raw.color,
                     "family_friendly": str(raw.family_friendly),

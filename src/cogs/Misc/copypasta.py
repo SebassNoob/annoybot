@@ -78,7 +78,7 @@ class Copypasta(commands.Cog):
                 for i in res["data"]["children"]
                 if 0 < len(i["data"]["selftext"]) <= 4000
             }
-            self.bot.redis_client.hmset("copypastas", copypastas)
+            self.bot.redis_client.hset("copypastas", mapping=copypastas)
 
         except KeyError:
             self.bot.logger.warning(f"failed to parse response from {sub}: {status}")

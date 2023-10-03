@@ -62,7 +62,6 @@ class Bot(commands.AutoShardedBot):
             else int(os.getenv("DEV_CACHE_PORT"))
         )
         retry = True if PROD else False
-
         self.redis_client = get_redis(redis_uri, redis_port, retry_on_error=retry)
 
         # block until redis is ready

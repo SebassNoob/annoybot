@@ -14,14 +14,14 @@ endif
 # docker-compose
 run:
 	$(DC_CMD) -v down
-	$(DC_CMD) up -d --build
+	$(DC_CMD) up -d --build --remove-orphans
 
 down:
 	$(DC_CMD) -v down
 
 # alembic
 migrate:
-	bash scripts/alembic_migrate.sh $(tag)
+	bash scripts/alembic_migration.sh $(tag)
 
 revise:
 	bash scripts/alembic_revision.sh $(name)

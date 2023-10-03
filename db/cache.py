@@ -3,7 +3,7 @@ import time
 import logging
 
 
-class ReadyRedis(redis.Redis):
+class ReadyRedis(redis.StrictRedis):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._ready = False
@@ -32,12 +32,10 @@ class ReadyRedis(redis.Redis):
 
 def get_redis(host: str, port: int, *, retry_on_error: bool = False) -> ReadyRedis:
     """Returns a redis client"""
+    pool = redis.ConnectionPool(host=host, port=port, db=0, decode_responses=True)
     res = ReadyRedis(
-        host=host,
-        port=port,
-        db=0,
+        connection_pool=pool,
         retry_on_error=retry_on_error,
-        decode_responses=True,
         socket_connect_timeout=1,
     )
     res.config_set("maxmemory-policy", "allkeys-lru")
