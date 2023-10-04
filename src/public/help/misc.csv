@@ -1,5 +1,5 @@
 name,description,permissions,user_permissions
-anime,Sends a pic of an anime woman,None,None,None
+anime,Sends a pic of an anime woman,None,None
 utils pick (arguments),Picks a random option from a list of given words.,None,None
 utils 8ball (question),Gives you a yes/no answer based on a given question,None,None
 autoresponse menu/add/remove/resetdb,Responds to certain keywords guild-wide and sends a message in return.,read_messages,manage_guild

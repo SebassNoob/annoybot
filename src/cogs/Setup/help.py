@@ -42,21 +42,24 @@ class Help(commands.Cog):
         ]
 
         # read the csv files and return the embeds, mapped to select option labels
-        content = {
-            "Core features": read_csv(f"{os.getcwd()}/src/public/help/main.csv"),
-            "Miscellaneous": read_csv(f"{os.getcwd()}/src/public/help/misc.csv"),
-            # "Trolling": None,
-            # "Voice": None,
-            # "Games": None,
-            # "Setup": None,
-            # "Message": None,
-            # "Member": None,
-        }
-
+        workdir = f"{os.getcwd()}/src/public/help/"
+        unloaded: list[tuple[str, str]] = [
+            ("Core features", "main.csv"),
+            ("Miscellaneous", "misc.csv"),
+            ("Setup", "setup.csv"),
+            ("Trolling", "trolling.csv"),
+            ("Voice", "voice.csv"),
+            ("Games", "games.csv"),
+            ("Message", "message.csv"),
+            ("Member", "member.csv"),
+        ]
+        content = {label: read_csv(f"{workdir}{path}") for label, path in unloaded}
         self.embeds = {category: discord.Embed(color=0x000000) for category in content}
         # populate the embeds
         for category, fields in content.items():
             for field in fields:
+                if len(field) != 4:
+                    raise ValueError(f"Invalid field length for {category}: {field}")
                 # description
                 val = f"*{field[1]}*"
 
