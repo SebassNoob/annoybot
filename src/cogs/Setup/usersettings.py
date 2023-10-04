@@ -8,32 +8,36 @@ from typing import Literal, Any
 from sqlalchemy.orm import Session
 from db.models import UserSettings, Snipe, UserServer
 
+
 class Rmdata(discord.ui.View):
-      def __init__(self, *, interaction: discord.Interaction, bot: commands.Bot):
+    def __init__(self, *, interaction: discord.Interaction, bot: commands.Bot):
         super().__init__()
         self.value = None
         self.interaction = interaction
         self.bot = bot
-      @discord.ui.button(label = "Confirm", style = discord.ButtonStyle.danger)
-      async def cfm(self, interaction: discord.Interaction, button: discord.ui.Button):
 
+    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.danger)
+    async def cfm(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.interaction.user.id:
-          await interaction.response.send_message(content = "Not your menu, idiot", ephemeral=True)
-          return
+            await interaction.response.send_message(
+                content="Not your menu, idiot", ephemeral=True
+            )
+            return
         self.value = True
         for child in self.children:
-          child.disabled = True
-        
+            child.disabled = True
+
         await interaction.response.defer()
-        
+
         try:
             with Session(self.bot.engine) as session:
-                session.query(UserServer).filter_by(user_id=interaction.user.id).delete()
+                session.query(UserServer).filter_by(
+                    user_id=interaction.user.id
+                ).delete()
                 session.query(Snipe).filter_by(id=interaction.user.id).delete()
                 session.query(UserSettings).filter_by(id=interaction.user.id).delete()
                 session.commit()
-                
-        
+
             self.bot.redis_client.delete(f"usersettings:{interaction.user.id}")
         except Exception as e:
             self.bot.logger.error(e)
@@ -43,19 +47,21 @@ class Rmdata(discord.ui.View):
             )
             return
         await self.interaction.edit_original_response(view=self)
-        await interaction.followup.send("✅ Successfully deleted your settings, good riddance!", ephemeral=True)
-        
-      @discord.ui.button(label = "Cancel", style = discord.ButtonStyle.primary)
-      async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.followup.send(
+            "✅ Successfully deleted your settings, good riddance!", ephemeral=True
+        )
+
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.primary)
+    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = False
         for child in self.children:
-          child.disabled = True
-        await self.interaction.edit_original_response(content = "cancelled, sad.", view=self)
+            child.disabled = True
+        await self.interaction.edit_original_response(
+            content="cancelled, sad.", view=self
+        )
 
         # defer to not get a 403
         await interaction.response.defer()
-        
-
 
 
 class Usersettings(commands.Cog):
@@ -64,27 +70,25 @@ class Usersettings(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    def update(
+        self,
+        user: discord.User,
+        property: Literal["color", "family_friendly", "sniped", "block_dms"],
+        value: Any,
+    ) -> None:
+        """Updates a user's settings in the database and cache."""
 
-    def update(self, user: discord.User, property: Literal["color", "family_friendly", "sniped", "block_dms"], value: Any) -> None:
-            """Updates a user's settings in the database and cache."""
-        
-            with Session(self.bot.engine) as session:
-                session.query(UserSettings).filter_by(id=user.id).update(
-                    {property: value}
-                )
-                session.commit()
+        with Session(self.bot.engine) as session:
+            session.query(UserSettings).filter_by(id=user.id).update({property: value})
+            session.commit()
 
-            # update cache
-            if not isinstance(value, str):
-                value = str(value)
-            self.bot.redis_client.hset(
-                f"usersettings:{user.id}", property, value
-            )
-        
-
+        # update cache
+        if not isinstance(value, str):
+            value = str(value)
+        self.bot.redis_client.hset(f"usersettings:{user.id}", property, value)
 
     settings_group = app_commands.Group(
-        name="settings", description="Shows your settings for the bot"
+        name="settings", description="Shows and updates your settings for the bot"
     )
 
     @settings_group.command(
@@ -119,9 +123,6 @@ class Usersettings(commands.Cog):
             text="Use /settings <setting> <value> to change a setting.\nDon't like the bot? Use /settings removedata to delete your settings."
         )
 
-
-
-
         await interaction.response.send_message(embed=em, ephemeral=True)
 
     @settings_group.command(
@@ -153,8 +154,8 @@ class Usersettings(commands.Cog):
         await interaction.followup.send(
             content=f"✅ Successfully changed your embed colour to {color}",
             ephemeral=True,
-        ) 
-    
+        )
+
     @settings_group.command(
         name="familyfriendly",
         description="Censors swear words.",
@@ -177,7 +178,7 @@ class Usersettings(commands.Cog):
             content=f"✅ Successfully changed your family friendly setting to {yes}",
             ephemeral=True,
         )
-    
+
     @settings_group.command(
         name="sniped",
         description="Determines if you can be sniped by others.",
@@ -185,7 +186,7 @@ class Usersettings(commands.Cog):
     @app_commands.describe(yes="True or False")
     async def sniped(self, interaction: discord.Interaction, yes: bool):
         await interaction.response.defer()
-        
+
         try:
             self.update(user=interaction.user, property="sniped", value=yes)
         except Exception as e:
@@ -200,7 +201,7 @@ class Usersettings(commands.Cog):
             content=f"✅ Successfully changed your sniped setting to {yes}",
             ephemeral=True,
         )
-    
+
     @settings_group.command(
         name="blockdms",
         description="If true, this blocks incoming DMs from the bot, and sends an error message.",
@@ -222,23 +223,26 @@ class Usersettings(commands.Cog):
             content=f"✅ Successfully changed your block DMs setting to {yes}",
             ephemeral=True,
         )
-    
+
     @settings_group.command(
         name="removedata",
         description="Deletes your settings from the database and cache.",
     )
     async def remove_data(self, interaction: discord.Interaction):
         view = Rmdata(interaction=interaction, bot=self.bot)
-        await interaction.response.send_message(content="Are you sure you wanna remove your data from the bot?\nYou will lose your personal settings.", view = view) 
+        await interaction.response.send_message(
+            content="Are you sure you wanna remove your data from the bot?\nYou will lose your personal settings.",
+            view=view,
+        )
         await view.wait()
 
         # if the menu times out
         if view.value is None:
-          for child in view.children:
-            child.disabled = True
-          await interaction.edit_original_response(content = "Timed out, loser", view = view)
-    
-
+            for child in view.children:
+                child.disabled = True
+            await interaction.edit_original_response(
+                content="Timed out, loser", view=view
+            )
 
 
 async def setup(bot):
