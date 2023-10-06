@@ -1,6 +1,7 @@
 from functools import lru_cache
 import random
 import datetime
+import os
 
 import discord
 from discord.ext import commands
@@ -9,7 +10,7 @@ from discord.ext import commands
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from db.models import UserServer, Snipe, UserSettings
-from utils import HDict
+from utils import HDict, parse_txt
 
 
 class Message(commands.Cog):
@@ -17,6 +18,9 @@ class Message(commands.Cog):
 
     def __init__(self, bot: commands.AutoShardedBot):
         self.bot = bot
+        self.angry_responses = parse_txt(
+            f"{os.getcwd()}/src/public/angry_responses.txt"
+        )
 
     @staticmethod
     @lru_cache(maxsize=64)
@@ -29,9 +33,11 @@ class Message(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
+        # ignore bots
+        if message.author.bot:
+            return
         if (
             message
-            and not message.author.bot
             and message.guild
             and message.guild.id in self.bot.autoresponse_servers
         ):
@@ -48,21 +54,13 @@ class Message(commands.Cog):
                 em = discord.Embed(
                     color=0x000555,
                     title="You need help? Get it yourself.",
-                    description="Visit the [support server](https://discord.gg/UCGAuRXmBD)!",
+                    description="Visit the [support server](https://discord.gg/UCGAuRXmBD), or use /help.",
                 )
                 em.set_footer(text="The embodiment of discord anarchy")
                 await message.channel.send(embed=em)
 
             else:
-                angry_responses = [
-                    "Stop pinging me.",
-                    "STOP PINGING ME YOU DUMB F**K",
-                    "Shut up, please",
-                    "https://imgur.com/t/mike_wazowski/lQyLC5G",
-                    "https://miro.medium.com/max/324/1*HI4kj-TPAQrfQkAdrw2KTA.png",
-                    "https://memegenerator.net/img/instances/61640131.jpg",
-                ]
-                await message.channel.send(random.choice(angry_responses))
+                await message.channel.send(random.choice(self.angry_responses))
 
     @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message):
