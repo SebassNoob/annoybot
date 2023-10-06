@@ -38,6 +38,8 @@ class Message(commands.Cog):
             response = self.handle_autoresponse(
                 HDict(self.bot.autoresponses[message.guild.id]), message.content
             )
+            if not message.channel.permissions_for(message.guild.me).send_messages:
+                return
             if response:
                 await message.channel.send(response)
 

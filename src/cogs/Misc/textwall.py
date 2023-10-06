@@ -22,6 +22,7 @@ class Textwall(commands.Cog):
         content="What to spam",
         tts="Whether to use text-to-speech",
     )
+    @app_commands.checks.bot_has_permissions(send_tts_messages=True)
     async def textwall(
         self,
         interaction: discord.Interaction,

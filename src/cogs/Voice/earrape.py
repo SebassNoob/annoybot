@@ -33,6 +33,7 @@ class Earrape(commands.Cog):
     @app_commands.describe(
         seconds="Number of seconds to play the earrape for. Max 10s."
     )
+    @app_commands.checks.bot_has_permissions(speak=True)
     async def earrape(
         self,
         interaction: discord.Interaction,

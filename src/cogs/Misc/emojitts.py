@@ -21,6 +21,7 @@ class Emojis(commands.Cog):
         name="emojitts", description="Reads out loud a long string of emojis"
     )
     @app_commands.describe(length="The length of the string of emojis to read")
+    @app_commands.checks.bot_has_permissions(send_tts_messages=True)
     async def emojitts(
         self, interaction: discord.Interaction, length: app_commands.Range[int, 1, 75]
     ):

@@ -19,6 +19,7 @@ class Snipes(commands.Cog):
     )
     @app_commands.guild_only()
     @app_commands.describe(user="The user you want to snipe")
+    @app_commands.checks.bot_has_permissions(read_message_history=True)
     async def snipe(self, interaction: discord.Interaction, user: discord.Member):
         with Session(self.bot.engine) as session:
             # check if user can be sniped

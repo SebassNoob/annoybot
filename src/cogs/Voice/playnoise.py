@@ -137,6 +137,7 @@ class PlayNoise(commands.Cog):
     )
 
     @playnoise_group.command(name="fart", description="Plays a fart Noise into your VC")
+    @app_commands.checks.bot_has_permissions(speak=True)
     async def fart(self, interaction: discord.Interaction):
         to_play = Noise(
             self.bot, interaction, f"{os.getcwd()}/src/public/voice/fart.mp3"
@@ -146,6 +147,7 @@ class PlayNoise(commands.Cog):
     @playnoise_group.command(
         name="micblow", description="Plays a breathing/blowing Noise into your VC"
     )
+    @app_commands.checks.bot_has_permissions(speak=True)
     async def micblow(self, interaction: discord.Interaction):
         to_play = Noise(
             self.bot, interaction, f"{os.getcwd()}/src/public/voice/mic.mp3"
@@ -155,6 +157,7 @@ class PlayNoise(commands.Cog):
     @playnoise_group.command(
         name="asmr", description="Plays a chewing Noise into your VC"
     )
+    @app_commands.checks.bot_has_permissions(speak=True)
     async def asmr(self, interaction: discord.Interaction):
         to_play = Noise(
             self.bot, interaction, f"{os.getcwd()}/src/public/voice/asmr.mp3"
@@ -164,6 +167,7 @@ class PlayNoise(commands.Cog):
     @playnoise_group.command(
         name="cartoon", description="Plays a goofy cartoon Noise into your VC"
     )
+    @app_commands.checks.bot_has_permissions(speak=True)
     async def cartoon(self, interaction: discord.Interaction):
         to_play = Noise(
             self.bot, interaction, f"{os.getcwd()}/src/public/voice/cartoon.mp3"
@@ -171,6 +175,7 @@ class PlayNoise(commands.Cog):
         await to_play.play()
 
     @playnoise_group.command(name="cbat", description="Plays cbat into your VC")
+    @app_commands.checks.bot_has_permissions(speak=True)
     async def cbat(self, interaction: discord.Interaction):
         to_play = Noise(
             self.bot, interaction, f"{os.getcwd()}/src/public/voice/mic.mp3"
@@ -180,6 +185,7 @@ class PlayNoise(commands.Cog):
     @playnoise_group.command(
         name="scream", description="Plays a female screaming Noise into your VC"
     )
+    @app_commands.checks.bot_has_permissions(speak=True)
     async def scream(self, interaction: discord.Interaction):
         to_play = Noise(
             self.bot, interaction, f"{os.getcwd()}/src/public/voice/scream.mp3"
@@ -190,6 +196,7 @@ class PlayNoise(commands.Cog):
         name="rickroll",
         description="Plays Never Gonna Give You Up (Rick Astley, 1987) into your VC",
     )
+    @app_commands.checks.bot_has_permissions(speak=True)
     async def rickroll(self, interaction: discord.Interaction):
         to_play = Noise(
             self.bot, interaction, f"{os.getcwd()}/src/public/voice/rick_astley.mp3"
@@ -200,6 +207,7 @@ class PlayNoise(commands.Cog):
         name="indianinsult",
         description="Plays the voice of an indian dude insulting your cock into your VC",
     )
+    @app_commands.checks.bot_has_permissions(speak=True)
     async def indian(self, interaction: discord.Interaction):
         to_play = Noise(
             self.bot, interaction, f"{os.getcwd()}/src/public/voice/indian_shitpost.mp3"
@@ -209,6 +217,7 @@ class PlayNoise(commands.Cog):
     @playnoise_group.command(
         name="fnafscream", description="plays the scream of freddy fazbear from fnaf"
     )
+    @app_commands.checks.bot_has_permissions(speak=True)
     async def fnaf(self, interaction: discord.Interaction):
         to_play = Noise(
             self.bot, interaction, f"{os.getcwd()}/src/public/voice/fnaf_scream.mp3"
@@ -219,6 +228,7 @@ class PlayNoise(commands.Cog):
         name="androidearrape",
         description="plays a bass boosted android notification sound",
     )
+    @app_commands.checks.bot_has_permissions(speak=True)
     async def android(self, interaction: discord.Interaction):
         to_play = Noise(
             self.bot, interaction, f"{os.getcwd()}/src/public/voice/android_earrape.mp3"

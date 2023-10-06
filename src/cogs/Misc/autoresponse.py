@@ -90,6 +90,7 @@ class Autoresponses(commands.Cog):
         name="menu",
         description="A list of words the bot will respond to in your server.",
     )
+    @app_commands.checks.bot_has_permissions(read_messages=True)
     async def auto_menu(self, interaction: discord.Interaction):
         await interaction.response.defer()
         content = "Here is the list of autoresponse keywords. Mods can turn this off in ``/serversettings`` and edit with ``/autoresponse add`` or ``/autoresponse remove``"
@@ -121,6 +122,7 @@ class Autoresponses(commands.Cog):
 
     @autoresponse.command(name="add", description="Add autoresponse keywords")
     @app_commands.checks.has_permissions(manage_guild=True)
+    @app_commands.checks.bot_has_permissions(read_messages=True)
     @app_commands.describe(
         word="The word you want the bot to respond to",
         response="The resulting response to the aforementioned word",
@@ -179,6 +181,7 @@ class Autoresponses(commands.Cog):
 
     @autoresponse.command(name="remove", description="Remove autoresponse keywords")
     @app_commands.checks.has_permissions(manage_guild=True)
+    @app_commands.checks.bot_has_permissions(read_messages=True)
     @app_commands.describe(
         word="The word you want the bot to stop responding to",
     )
@@ -236,6 +239,7 @@ class Autoresponses(commands.Cog):
         name="resetdb", description="Reset the autoresponse menu to it's default state."
     )
     @app_commands.checks.has_permissions(manage_guild=True)
+    @app_commands.checks.bot_has_permissions(read_messages=True)
     async def resetdb(self, interaction: discord.Interaction):
         # confirmation
         await interaction.response.defer()
