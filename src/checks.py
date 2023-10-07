@@ -101,10 +101,12 @@ async def custom_cooldown(interaction: discord.Interaction):
     if interaction.user.id == int(os.getenv("OWNER_ID")):
         return None
 
+    if interaction.command.name in ("fakeban", "fakemute"):
+        return app_commands.Cooldown(2, 30)
+
     # get the support server guild object
     guild = interaction.client.get_guild(858200514914287646)
-
-    if guild and guild.get_member(interaction.user.id):
+    if guild and guild.get_member(interaction.user.id) is not None:
         return app_commands.Cooldown(12, 30)
 
     return app_commands.Cooldown(7, 30)

@@ -1,38 +1,31 @@
+PATCH 2.0.0
+
+optimisation:
+
+- 40% faster /meme and /copypasta
+- xx% faster bot startup time
+- caching implemented for all commands involving file reads, > 10% faster for most commands
 
 
-Key points to note:
-- Added notable contributors to /info
-- backups of your user data are now sent to the support server in a private channel
-- the privacy policy and terms of use has been updated to reflect this
-- github events are now available in #github in the support server
-- this creates greater transparency as to what's going on with the bot
-- early leaks and plans will be available
-- will add contributing guidelines later on
+UX:
+- /snipe is now timezone aware
+- /autoresponse now warns if it is turned off
+- /autoresponse delete now deletes from a keyword specified, no longer needing an id from /autoresponse menu.
+- /settings dmblocker has been renamed to /settings blockdms. Thanks for the feedback!
+- /settings color now contains a link to a wikipedia article on what is a hex color
+- /removedata is now /settings removedata
+- /earrape is now limited to 10s, and now attempts to play at 2x volume. 
+- /channeltroll user response window has been increased 10s->20s
+
+backend:
+- DB has been restructured and is now hosted on Turso.
+- introduced Redis as a cache to store user data
 
 
-New!
-- emojitts -> generates a string of emojis and reads them out to a text channel as tts. 
-- more /playnoise cmds (five nights at freddys scream, thomas the train earrape)
-- member commands!
-- The first member command "gtfo from VC" is here! You can access it by right clicking a user in a vc and selecting 'apps'. This particular command moves a selected user around thrice randomly.
-- /legal has been removed. /info now contains the information previously found in /legal
-- /meme now shows which subreddit it originated from
+fixes:
+- you no longer can unban yourself with /serversettings blacklist remove (even if you're a mod)
+- bot no longer stays afk in voice channel after being forcefully moved.
+- added check to ensure voice channel is not full before bot joins a voice channel.
 
-
-bugs:
-- /settings dmblocker meaning is more clear, hopefully.
-- overflow error for /copypasta has been fixed
-- fix /settings dmblocker none type assignment 
-- /copypasta censors words correctly if family friendly mode is turned on
-- /textwall throws an error at you if you try to generate a 0-length text wall
-- tips have been updated to slash commands, can't believe people didn't notice lol
-- /meme fails on deepfriedmemes
-- dmthreaten fails if response takes too long
-- memorygame fails if some other random dude interacts with it...
-- autoresponse fails if channel perms are incorrect
-- ratio now checks for blank messages
-- fix invalid perms for /fakeban
-- fix /channeltroll failing on thread deletion
-- fix dmtroll timeout
-- fix negative number input in /textwall
-- updated server join message 
+known issues:
+- forced removal of the bot from a voice channel will trigger a forced reconnect, rendering the but unable to update its voice state. Fixed in the next version of discord.py
