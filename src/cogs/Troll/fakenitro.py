@@ -33,7 +33,7 @@ class Fakenitro(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @app_commands.command(name="nitrotroll", description="Sends a fake nitro embed")
+    @app_commands.command(name="fakenitro", description="Sends a fake nitro embed")
     async def nitrotroll(self, interaction: discord.Interaction):
         em = discord.Embed(
             color=0x7289DA,

@@ -1,9 +1,8 @@
-PATCH 2.0.0
 
 optimisation:
 
 - 40% faster /meme and /copypasta
-- xx% faster bot startup time
+- 300% faster bot startup time 
 - caching implemented for all commands involving file reads, > 10% faster for most commands
 
 
@@ -16,6 +15,10 @@ UX:
 - /removedata is now /settings removedata
 - /earrape is now limited to 10s, and now attempts to play at 2x volume. 
 - /channeltroll user response window has been increased 10s->20s
+- /nicktroll and /fakeban will return the original nickname that the user had before the command occured.
+- /fakemute and /fakeban timeout duration 2s->1s and cooldown 7->2 per 30 seconds
+- /nitrotroll has been renamed to /fakenitro
+
 
 backend:
 - DB has been restructured and is now hosted on Turso.

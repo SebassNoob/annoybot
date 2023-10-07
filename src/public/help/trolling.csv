@@ -1,6 +1,9 @@
 name,description,permissions,user_permissions
-help,Shows a list of commands that you can use,None,None
-info,Shows general information and support links.,None,None
-ping,Shows connectivity information of the bot,None,None
-settings menu/color/familyfriendly/sniped/blockdms/removedata,Shows and updates your settings for the bot,None,None
-serversettings menu/autoresponse/blacklist,Shows the menu for server settings,None,manage_guild
+channeltroll (user),Creates a temporary thread then pings a user once to mess with them,None,send_messages_in_threads; create_public_threads; manage_threads
+dmtroll (user),pings a user in DMs once,None,None
+fakeban (user),Fakes a ban for a user,None,moderate_members; manage_nicknames
+fakemute (user; *reason),Fakes a mute for a user,None,moderate_members
+fakenitro,Sends a fake nitro embed,None,None
+ghosttroll (user),Ghostpings a user in 3 different channels,None,None
+nicktroll (user; *nickname),Generates a temporary nickname for a user,None,manage_nicknames
+roletroll (user; name; *color),Give a target a nasty coloured role with an insulting name,None,manage_roles
