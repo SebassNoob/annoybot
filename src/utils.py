@@ -5,7 +5,7 @@ from typing import Any, Optional, Literal
 import discord
 
 from sqlalchemy import Engine
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, Query
 from sqlalchemy.exc import IntegrityError
 
 from db.models import UserServer, UserSettings, ServerSettings, Autoresponse
@@ -125,3 +125,15 @@ def check_usersettings_cache(
                 res[idx] = True if val == "True" else False
 
     return res
+
+
+def page_query(q: Query):
+    offset = 0
+    while True:
+        r = False
+        for elem in q.limit(500).offset(offset):
+            r = True
+            yield elem
+        offset += 500
+        if not r:
+            break

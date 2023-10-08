@@ -87,7 +87,7 @@ class Message(commands.Cog):
                             UserServer.user_id == message.author.id
                             or UserServer.server_id == message.guild.id
                         )
-                        .all()
+                        .first()
                     )
                 snipe_present = (
                     session.query(Snipe)

@@ -7,11 +7,13 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from typing import List
 
+
 import dotenv
 
 dotenv.load_dotenv(f"{os.getcwd()}/.env")
 
 from db.models import UserServer, UserSettings, ServerSettings
+from src.utils import page_query
 
 
 # wraps add_users_to_db to pass in the engine
@@ -32,7 +34,7 @@ def add_users_to_db_wrapped_engine(engine: Engine):
                             (UserServer.user_id == interaction.user.id)
                             & (UserServer.server_id == interaction.guild.id)
                         )
-                        .all()
+                        .first()
                     )
 
                 # if the user is not in the db, add them
@@ -115,6 +117,6 @@ async def custom_cooldown(interaction: discord.Interaction):
 def check_guilds_not_in_db(engine: Engine, guilds: List[Guild]):
     """Returns which guilds are not in DB"""
     with Session(engine) as session:
-        db_guild_ids = session.query(ServerSettings.id).all()
+        db_guild_ids = page_query(session.query(ServerSettings.id))
         flat_db_guild_ids = [g[0] for g in db_guild_ids]
         return [g for g in guilds if g.id not in flat_db_guild_ids]

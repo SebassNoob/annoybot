@@ -26,6 +26,7 @@ from logging.handlers import TimedRotatingFileHandler
 sys.path.insert(1, os.getcwd())
 from db.client import make_engine
 from db.models import ServerSettings, Autoresponse
+from src.utils import page_query
 
 from src.checks import (
     add_users_to_db_wrapped_engine,
@@ -73,15 +74,17 @@ class Bot(commands.AutoShardedBot):
             self.autoresponse_servers = set(
                 [
                     i[0]
-                    for i in session.query(ServerSettings.id)
-                    .filter(ServerSettings.autoresponse_on)
-                    .all()
+                    for i in page_query(
+                        session.query(ServerSettings.id).filter(
+                            ServerSettings.autoresponse_on
+                        )
+                    )
                 ]
             )
-            raw = (
-                session.query(Autoresponse)
-                .filter(Autoresponse.server_id.in_(self.autoresponse_servers))
-                .all()
+            raw = page_query(
+                (session.query(Autoresponse)).filter(
+                    Autoresponse.server_id.in_(self.autoresponse_servers)
+                )
             )
 
             # map raw[0] which is a server id to a dict of all the autoresponses

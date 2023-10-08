@@ -36,6 +36,9 @@ drop_db:
 test_db:
 	python db/init_db.py test $(tag)
 
+# migrate from 1.9.0
+migrate_1_9_0:
+	bash scripts/major_migrate.sh
 # black formatter
 black:
 	black ./src

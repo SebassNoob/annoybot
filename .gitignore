@@ -13,3 +13,6 @@ __pycache__/
 
 # ignore logs
 logs/
+
+# ignore db files from previous version
+*.db
