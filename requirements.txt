@@ -33,6 +33,6 @@ six==1.16.0
 SQLAlchemy==2.0.20
 sqlalchemy-libsql==0.1.0
 typing_extensions==4.7.1
-urllib3==2.0.4
+urllib3==2.0.7
 waifu-py==1.0.3
 yarl==1.9.2
