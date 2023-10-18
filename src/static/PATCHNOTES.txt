@@ -3,7 +3,7 @@ optimisation:
 
 - 40% faster /meme and /copypasta
 - 300% faster bot startup time 
-- caching implemented for all commands involving file reads, > 10% faster for most commands
+- caching implemented for all commands involving file reads, ~ 10% faster for most commands
 
 
 UX:
@@ -18,6 +18,8 @@ UX:
 - /nicktroll and /fakeban will return the original nickname that the user had before the command occured.
 - /fakemute and /fakeban timeout duration 2s->1s and cooldown 7->2 per 30 seconds
 - /nitrotroll has been renamed to /fakenitro
+- /typingrace now does not start if no one is participating
+- /typingrace duration 180s -> 120s
 
 
 backend:
@@ -29,6 +31,8 @@ fixes:
 - you no longer can unban yourself with /serversettings blacklist remove (even if you're a mod)
 - bot no longer stays afk in voice channel after being forcefully moved.
 - added check to ensure voice channel is not full before bot joins a voice channel.
+- fixed app crash on execution of "gtfo from vc"
+- prevent 404s on /typingrace if another instance of this command is running.
 
 known issues:
 - forced removal of the bot from a voice channel will trigger a forced reconnect, rendering the but unable to update its voice state. Fixed in the next version of discord.py
