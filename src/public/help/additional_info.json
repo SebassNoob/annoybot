@@ -1,0 +1,10 @@
+{
+  "Core features": "None",
+  "Trolling": "The commands 'fakemute' and 'fakeban' are ratelimited to 2 uses/30 seconds",
+  "Voice": "None",
+  "Games": "None",
+  "Miscellaneous": "None",
+  "Setup": "None",
+  "Message": "To access these commands, right click on a message and select 'Apps'",
+  "Member": "To access these commands, right click on a member and select 'Apps'"
+}

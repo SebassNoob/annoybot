@@ -6,6 +6,8 @@ import asyncio
 
 
 class Voicemove(commands.Cog):
+    """Move members between voice channels"""
+
     def __init__(self, bot):
         self.bot = bot
         self.voicemove_cmd = app_commands.ContextMenu(

@@ -1,6 +1,4 @@
 name,description,permissions,user_permissions
-help,Shows a list of commands that you can use,None,None
-info,Shows general information and support links.,None,None
-ping,Shows connectivity information of the bot,None,None
-settings menu/color/familyfriendly/sniped/blockdms/removedata,Shows and updates your settings for the bot,None,None
-serversettings menu/autoresponse/blacklist,Shows the menu for server settings,None,manage_guild
+ratio,Ratio a message,add_reactions,None
+spam emojis,Append emojis to a message,add_reactions,None
+uwuify,Changes "a message" into "a MeSsAgE",None,None
