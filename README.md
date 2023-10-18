@@ -1,6 +1,6 @@
 # Annoybot
 
-This is the 2.0 rewrite for annoybot. ([<= 1.9.0 repo](https://github.com/SebassNoob/bot))
+This is the v2 rewrite for annoybot. ([<= 1.9.0 repo](https://github.com/SebassNoob/bot))
 
 Built with discord.py, Redis and Turso.
 
@@ -22,9 +22,10 @@ Why wait? Piss your friends off now!
 DONE:
 - Automatically sharded bot on the server
 - Turso primary db (sin)
+- redis client
+- scheduler with ``ediscord.ext.tasks``
 
 TODO:
-- Redis caching on local machine
 - Replication to secondary
 
 
@@ -56,8 +57,10 @@ make migrate # handles alembic upgrades
 ```
 
 ### Misc commands
-format: ``make black`` :)
+format: ``make black`` 
 
 alembic revision: 
 
 make changes to the ``db/models/`` directory. Once done, run ``make revise`` (Doing ``alembic revision -m "..."`` will not work with libsql) to autogenerate a revision with alembic.
+
+migration on prod: run ``alembic upgrade \<migration-hash\> --sql > dump.sql``, copy the content of the file, and paste into ``turso db shell \<name\>``. (have not figured out turso auth yet :skull:)

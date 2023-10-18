@@ -14,5 +14,9 @@ __pycache__/
 # ignore logs
 logs/
 
+# dump files
+dump/
+*.sql
+
 # ignore db files from previous version
 *.db

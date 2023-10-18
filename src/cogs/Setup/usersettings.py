@@ -160,12 +160,12 @@ class Usersettings(commands.Cog):
         name="familyfriendly",
         description="Censors swear words.",
     )
-    @app_commands.describe(yes="True or False")
-    async def fam_friendly(self, interaction: discord.Interaction, yes: bool):
+    @app_commands.describe(onoff="True or False")
+    async def fam_friendly(self, interaction: discord.Interaction, onoff: bool):
         await interaction.response.defer()
 
         try:
-            self.update(user=interaction.user, property="family_friendly", value=yes)
+            self.update(user=interaction.user, property="family_friendly", value=onoff)
         except Exception as e:
             self.bot.logger.error(e)
             await interaction.followup.send(
@@ -175,7 +175,7 @@ class Usersettings(commands.Cog):
             return
 
         await interaction.followup.send(
-            content=f"✅ Successfully changed your family friendly setting to {yes}",
+            content=f"✅ Successfully changed your family friendly setting to {onoff}",
             ephemeral=True,
         )
 
@@ -183,12 +183,12 @@ class Usersettings(commands.Cog):
         name="sniped",
         description="Determines if you can be sniped by others.",
     )
-    @app_commands.describe(yes="True or False")
-    async def sniped(self, interaction: discord.Interaction, yes: bool):
+    @app_commands.describe(onoff="True or False")
+    async def sniped(self, interaction: discord.Interaction, onoff: bool):
         await interaction.response.defer()
 
         try:
-            self.update(user=interaction.user, property="sniped", value=yes)
+            self.update(user=interaction.user, property="sniped", value=onoff)
         except Exception as e:
             self.bot.logger.error(e)
             await interaction.followup.send(
@@ -198,7 +198,7 @@ class Usersettings(commands.Cog):
             return
 
         await interaction.followup.send(
-            content=f"✅ Successfully changed your sniped setting to {yes}",
+            content=f"✅ Successfully changed your sniped setting to {onoff}",
             ephemeral=True,
         )
 
@@ -206,11 +206,11 @@ class Usersettings(commands.Cog):
         name="blockdms",
         description="If true, this blocks incoming DMs from the bot, and sends an error message.",
     )
-    @app_commands.describe(yes="True or False")
-    async def block_dms(self, interaction: discord.Interaction, yes: bool):
+    @app_commands.describe(onoff="True or False")
+    async def block_dms(self, interaction: discord.Interaction, onoff: bool):
         await interaction.response.defer()
         try:
-            self.update(user=interaction.user, property="block_dms", value=yes)
+            self.update(user=interaction.user, property="block_dms", value=onoff)
         except Exception as e:
             self.bot.logger.error(e)
             await interaction.followup.send(
@@ -220,7 +220,7 @@ class Usersettings(commands.Cog):
             return
 
         await interaction.followup.send(
-            content=f"✅ Successfully changed your block DMs setting to {yes}",
+            content=f"✅ Successfully changed your block DMs setting to {onoff}",
             ephemeral=True,
         )
 
