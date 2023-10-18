@@ -32,14 +32,14 @@ class Iplookup(commands.Cog):
         )[0]
 
         if status != 200:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "❌ There was an error with the ip lookup API. Try again later.",
                 ephemeral=True,
             )
             return
 
         if res["status"] != "success":
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "❌ Thats not a valid ip, idiot.", ephemeral=True
             )
             return
@@ -55,7 +55,7 @@ class Iplookup(commands.Cog):
             }
 
         except KeyError:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "❌ An unspecified error occured, the ip address probably is private. What a loser lmao."
             )
             return
