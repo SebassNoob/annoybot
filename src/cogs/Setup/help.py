@@ -53,8 +53,14 @@ class Help(commands.Cog):
             ("Message", "message.csv"),
             ("Member", "member.csv"),
         ]
+        additional_info = read_json(f"{workdir}additional_info.json")
         content = {label: read_csv(f"{workdir}{path}") for label, path in unloaded}
-        self.embeds = {category: discord.Embed(color=0x000000) for category in content}
+        self.embeds = {
+            category: discord.Embed(
+                color=0x000000, description=additional_info[category]
+            )
+            for category in content
+        }
         # populate the embeds
         for category, fields in content.items():
             for field in fields:
