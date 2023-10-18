@@ -1,5 +1,7 @@
 from dotenv import load_dotenv
 from discord.ext import commands, tasks
+from db.models import Snipe
+from sqlalchemy.orm import Session
 import os
 import aiohttp
 import datetime
@@ -14,6 +16,7 @@ class Scheduler(commands.Cog):
     def __init__(self, bot: commands.AutoShardedBot):
         self.bot = bot
         self.send_logs.start()
+        self.clear_snipe.start()
 
     @tasks.loop(hours=12, reconnect=False)
     async def send_logs(self):
@@ -40,6 +43,13 @@ class Scheduler(commands.Cog):
                     )
                     return
                 self.bot.logger.info("Logs sent to the support server")
+
+    @tasks.loop(hours=24, reconnect=False)
+    async def clear_snipe(self):
+        """Clear snipe cache"""
+        with Session(self.bot.engine) as session:
+            session.query(Snipe).delete()
+            session.commit()
 
     @send_logs.before_loop
     async def before_send_logs(self):
