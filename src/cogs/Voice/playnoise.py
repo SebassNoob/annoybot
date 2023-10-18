@@ -86,10 +86,12 @@ class Noise:
 
     async def play(self):
         try:
-            channel = self.interaction.user.voice.channel
-            if channel is None:
+            voicestate = self.interaction.user.voice
+            if voicestate is None or voicestate.channel is None:
                 await self.response(False, "❌ You are not in a VC, stupid.")
                 return
+
+            channel = voicestate.channel
 
             # if user_limit is 0, then there is no limit
             if channel.user_limit is not None and channel.user_limit != 0:

@@ -17,7 +17,7 @@ class Ghosttroll(commands.Cog):
     @app_commands.describe(user="The user to ping")
     @app_commands.guild_only()
     async def ghosttroll(self, interaction: discord.Interaction, user: discord.Member):
-        allowedChannels: list[discord.TextChannel | None] = []
+        allowedChannels: list[discord.TextChannel] = []
 
         for channel in interaction.guild.channels:
             if (
@@ -35,6 +35,7 @@ class Ghosttroll(commands.Cog):
             await interaction.response.send_message(
                 "That user can't access any channels, bruh wtf"
             )
+            return
 
         i = 3
         while i != 0:
@@ -50,7 +51,7 @@ class Ghosttroll(commands.Cog):
             except Exception as e:
                 # this really should not be happening
                 self.bot.logger.warning(e)
-                continue
+                break
 
 
 async def setup(bot):

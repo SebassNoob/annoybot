@@ -136,14 +136,14 @@ class Serversettings(commands.Cog):
         if modify == "add":
             # cant ban yourself
             if user.id == interaction.user.id:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     "❌ You can't blacklist yourself, dumb.", ephemeral=True
                 )
                 return
 
             # cant blacklist twice
             if bl:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     "❌ This person is already blacklisted? Get good next time.",
                     ephemeral=True,
                 )
@@ -163,14 +163,14 @@ class Serversettings(commands.Cog):
         elif modify == "remove":
             # cant unban yourself
             if user.id == interaction.user.id:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     "❌ You can't unblacklist yourself, dumb.", ephemeral=True
                 )
                 return
 
             # cant unban someone who isnt banned
             if not bl:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     f"❌ {user.display_name} is not blacklisted???????", ephemeral=True
                 )
                 return

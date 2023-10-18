@@ -102,7 +102,17 @@ def check_usersettings_cache(
     if not all(res):
         # if not all columns are in the cache, get them from the db
         with Session(engine) as session:
-            raw = session.query(UserSettings).filter(UserSettings.id == user.id).one()
+            raw = (
+                session.query(UserSettings)
+                .filter(UserSettings.id == user.id)
+                .one_or_none()
+            )
+            if raw is None:
+                # if the user is not in the db, add them
+                add_user(user, engine)
+                raw = (
+                    session.query(UserSettings).filter(UserSettings.id == user.id).one()
+                )
 
             # add to cache
             redis_client.hset(
