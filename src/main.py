@@ -46,7 +46,7 @@ class Bot(commands.AutoShardedBot):
         intents.message_content = True
 
         super().__init__(
-            command_prefix="a$", intents=intents, shard_count=1, help_command=None
+            command_prefix="a$", intents=intents, shard_count=2, help_command=None
         )
         # make a logger and a database engine for the bot
         self.logger = logging.getLogger("bot")
