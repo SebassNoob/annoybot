@@ -17,6 +17,7 @@ class Scheduler(commands.Cog):
         self.bot = bot
         self.send_logs.start()
         self.clear_snipe.start()
+        self.disconnect_voice.start()
 
     @tasks.loop(hours=12, reconnect=False)
     async def send_logs(self):
@@ -50,6 +51,13 @@ class Scheduler(commands.Cog):
         with Session(self.bot.engine) as session:
             session.query(Snipe).delete()
             session.commit()
+
+    @tasks.loop(minutes=5, reconnect=False)
+    async def disconnect_voice(self):
+        """Disconnect from voice channels"""
+        for guild in self.bot.guilds:
+            if guild.voice_client is not None and not guild.voice_client.is_playing():
+                await guild.voice_client.disconnect()
 
     @send_logs.before_loop
     async def before_send_logs(self):
