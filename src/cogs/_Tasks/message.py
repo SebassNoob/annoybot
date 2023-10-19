@@ -75,14 +75,14 @@ class Message(commands.Cog):
         with Session(self.bot.engine) as session:
             try:
                 usersettings_present = (
-                    session.query(UserSettings)
+                    session.query(UserSettings.id)
                     .filter(UserSettings.id == message.author.id)
                     .one_or_none()
                 )
 
                 if message.guild:
                     userserver_present = (
-                        session.query(UserServer)
+                        session.query(UserServer.user_id)
                         .filter(
                             UserServer.user_id == message.author.id
                             or UserServer.server_id == message.guild.id
@@ -90,7 +90,7 @@ class Message(commands.Cog):
                         .first()
                     )
                 snipe_present = (
-                    session.query(Snipe)
+                    session.query(Snipe.id)
                     .filter(Snipe.id == message.author.id)
                     .one_or_none()
                 )

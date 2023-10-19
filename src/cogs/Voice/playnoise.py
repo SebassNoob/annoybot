@@ -180,7 +180,7 @@ class PlayNoise(commands.Cog):
     @app_commands.checks.bot_has_permissions(speak=True)
     async def cbat(self, interaction: discord.Interaction):
         to_play = Noise(
-            self.bot, interaction, f"{os.getcwd()}/src/public/voice/mic.mp3"
+            self.bot, interaction, f"{os.getcwd()}/src/public/voice/cbat.mp3"
         )
         await to_play.play()
 
