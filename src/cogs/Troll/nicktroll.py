@@ -18,6 +18,7 @@ class Nicktroll(commands.Cog):
     )
     @app_commands.checks.bot_has_permissions(manage_nicknames=True)
     @app_commands.describe(member="The member to troll", name="A nick to give")
+    @app_commands.guild_only()
     async def nicktroll(
         self,
         interaction: discord.Interaction,

@@ -40,6 +40,7 @@ fixes:
 - fixed no row found in /dmtroll (and hopefully any other occurances)
 - fixed corrupt audio files and incorrect mapping
 - add voice disconnect scheduler which attempts to disconnect from any voice_clients if it is not playing anything. Occurs every 5 mins.
+- fixed conversion failure on /nicktroll when attempting to execute in a non guild channel
 
 known issues:
 - forced removal of the bot from a voice channel will trigger a forced reconnect, rendering the but unable to update its voice state. Fixed in the next version of discord.py
