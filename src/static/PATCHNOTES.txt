@@ -3,7 +3,7 @@ optimisation:
 
 - 40% faster /meme and /copypasta
 - 300% faster bot startup time 
-- caching implemented for all commands involving file reads, ~ 10% faster for most commands
+- caching implemented for all commands involving file reads, > 10% faster for most commands
 
 
 UX:
@@ -33,6 +33,13 @@ fixes:
 - added check to ensure voice channel is not full before bot joins a voice channel.
 - fixed app crash on execution of "gtfo from vc"
 - prevent 404s on /typingrace if another instance of this command is running.
+- fixed /iplookup no response
+- fixed /serversettings blacklist no response
+- fixed /ghosttroll infinite loop
+- fixed Nonetype error in /playnoise
+- fixed no row found in /dmtroll (and hopefully any other occurances)
+- fixed corrupt audio files and incorrect mapping
+- add voice disconnect scheduler which attempts to disconnect from any voice_clients if it is not playing anything. Occurs every 5 mins.
 
 known issues:
 - forced removal of the bot from a voice channel will trigger a forced reconnect, rendering the but unable to update its voice state. Fixed in the next version of discord.py
