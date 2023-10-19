@@ -134,7 +134,7 @@ class Message(commands.Cog):
                         }
                     )
                 session.commit()
-            except IntegrityError as e:
+            except (IntegrityError, TimeoutError) as e:
                 session.rollback()
                 self.bot.logger.error(e)
 
