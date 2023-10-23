@@ -16,6 +16,7 @@ class Voicemove(commands.Cog):
         self.bot.tree.add_command(self.voicemove_cmd)
 
     @app_commands.checks.bot_has_permissions(move_members=True)
+    @app_commands.guild_only()
     async def voicemove(self, interaction: discord.Interaction, user: discord.Member):
         if user.voice is None:
             await interaction.response.send_message(

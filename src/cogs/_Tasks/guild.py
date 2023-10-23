@@ -2,7 +2,7 @@ import os
 import discord
 from discord.ext import commands, tasks
 
-
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from db.models import Autoresponse, ServerSettings, UserServer
 
@@ -30,7 +30,7 @@ class Guild(commands.Cog):
                 await channel.send(embed=em)
                 return
         # if there is no channel where the bot is allowed to send the welcome message in, ignore and log the server
-        self.logger.warning(f"failed to send welcome to {guild.name}: {guild.id}")
+        self.bot.logger.warning(f"failed to send welcome to {guild.name}: {guild.id}")
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild, send_welcome=True):
@@ -49,7 +49,13 @@ class Guild(commands.Cog):
             ]
 
             session.add_all(res)
-            session.commit()
+            try:
+                session.commit()
+            except IntegrityError as e:
+                session.rollback()
+                self.bot.logger.warning(
+                    f"failed to execute on_guild_join for {guild.name}: {guild.id}\n{e}"
+                )
         if send_welcome:
             await self.send_welcome(guild)
 

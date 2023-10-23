@@ -28,7 +28,6 @@ class Error(commands.Cog):
                 self.bot.logger.error(error)
                 return
             if isinstance(error, CommandOnCooldown):
-                
                 em = discord.Embed(
                     color=0x000000,
                     description="You have exceeded this command's ratelimits. Try again in **%.1fs**."

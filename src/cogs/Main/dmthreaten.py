@@ -49,7 +49,7 @@ class Dmthreaten(commands.Cog):
             family_friendly, color, block_dms = res
 
         if block_dms or user.bot:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 content="❌ The user you mentioned is either a bot, or does not want to be DM'ed. Bet you look stupid now.",
                 ephemeral=True,
             )

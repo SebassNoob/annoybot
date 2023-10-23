@@ -31,7 +31,10 @@ class Emojispam(commands.Cog):
     ):
         await interaction.response.send_message("attempting to spam emojis...")
         for _ in range(7):
-            await message.add_reaction(next(self.random_emoji()))
+            try:
+                await message.add_reaction(next(self.random_emoji()))
+            except discord.errors.HTTPException:
+                break
         await interaction.edit_original_response(content="done. loser")
 
 

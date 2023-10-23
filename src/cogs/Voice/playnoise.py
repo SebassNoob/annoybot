@@ -77,14 +77,15 @@ class Noise:
             ).set_footer(
                 text="You can force the bot to disconnect with the button below, if youre a pussy that is"
             )
-            await self.interaction.response.send_message(embed=em, view=view)
+            await self.interaction.followup.send(embed=em, view=view)
 
         # an error was encountered!!!! wow!!!
         else:
             em = discord.Embed(color=int(color, 16), description=message)
-            await self.interaction.response.send_message(embed=em)
+            await self.interaction.followup.send(embed=em)
 
     async def play(self):
+        await self.interaction.response.defer()
         try:
             voicestate = self.interaction.user.voice
             if voicestate is None or voicestate.channel is None:
