@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+import discord
 from discord.ext import commands, tasks
 from db.models import Snipe
 from sqlalchemy.orm import Session
@@ -19,7 +20,7 @@ class Scheduler(commands.Cog):
         self.clear_snipe.start()
         self.disconnect_voice.start()
 
-    @tasks.loop(hours=12, reconnect=False)
+    @tasks.loop(hours=3, reconnect=False)
     async def send_logs(self):
         """Send logs to the support server"""
         url = os.getenv("WEBHOOK_LOGS")
@@ -27,23 +28,13 @@ class Scheduler(commands.Cog):
             self.bot.logger.warning("No webhook url found for logs")
             return
 
-        files = {
-            "payload_json": json.dumps(
-                {
-                    "content": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
-                }
-            ),
-            "files[0]": open(f"{os.getcwd()}/logs/discord.log", "rb"),
-        }
+        wh = discord.Webhook.from_url(url, client=self.bot)
+        await wh.send(
+            content=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+            file=discord.File(f"{os.getcwd()}/logs/discord.log"),
+        )
 
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, data=files) as response:
-                if response.status not in [200, 204]:
-                    self.bot.logger.warning(
-                        f"Failed to send logs to the support server. Status code: {response.status}"
-                    )
-                    return
-                self.bot.logger.info("Logs sent to the support server")
+        self.bot.logger.info("Logs sent to the support server")
 
     @tasks.loop(hours=24, reconnect=False)
     async def clear_snipe(self):
