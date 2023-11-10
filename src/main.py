@@ -52,8 +52,8 @@ class Bot(commands.AutoShardedBot):
         self.logger = logging.getLogger("bot")
 
         # if env is PROD, use the production database, else use the development database
-        loc = os.getenv("PROD_DB_LOC") if PROD else os.getenv("DEV_DB_LOC")
-        self.engine = make_engine(loc=loc)
+        self.db_loc = os.getenv("PROD_DB_LOC") if PROD else os.getenv("DEV_DB_LOC")
+        self.engine = make_engine(loc=self.db_loc)
 
         # connect to redis with the appropriate uri and port
         redis_uri = os.getenv("PROD_CACHE_URI") if PROD else os.getenv("DEV_CACHE_URI")

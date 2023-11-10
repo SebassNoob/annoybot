@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from discord.app_commands.errors import (
-    CheckFailure,
     CommandOnCooldown,
     BotMissingPermissions,
     MissingPermissions,
