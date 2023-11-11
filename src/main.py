@@ -118,10 +118,6 @@ class Bot(commands.AutoShardedBot):
 
             cmd = app_commands.checks.dynamic_cooldown(custom_cooldown)(cmd)
 
-        await self.change_presence(
-            activity=discord.Game(name=f"/help | annoying {self.curr_guilds} servers")
-        )
-
     # load cogs
     async def setup_hook(self):
         # iterate through all the folders in the cogs directory
