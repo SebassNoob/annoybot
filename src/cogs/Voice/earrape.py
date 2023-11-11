@@ -41,10 +41,11 @@ class Earrape(commands.Cog):
     ):
         await interaction.response.defer()
         try:
-            channel = interaction.user.voice.channel
-            if channel is None:
+            voicestate = interaction.user.voice
+            if voicestate is None or voicestate.channel is None:
                 await interaction.followup.send("❌ You are not in a VC, stupid.")
                 return
+            channel = voicestate.channel
             if channel.user_limit is not None and channel.user_limit != 0:
                 if len(channel.members) >= channel.user_limit:
                     await interaction.followup.send("❌ The VC is full.")
