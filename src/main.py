@@ -96,6 +96,11 @@ class Bot(commands.AutoShardedBot):
                 ] = autoresponse.response
 
     async def on_ready(self):
+        # if any shard sessions are invalidated, this will reset the db connection to prevent ws timeout
+        self.engine.dispose()
+        self.engine = make_engine(loc=self.db_loc)
+        self.logger.info("Ready. Reset DB connection.")
+
         self.curr_guilds = len(self.guilds)
 
         self.logger.info(f"* {self.user} connected to {self.curr_guilds} servers")
