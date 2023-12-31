@@ -10,9 +10,9 @@ class Sysexit(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def sysexit(self, ctx):
+    async def sysexit(self, ctx, code: int = 1):
         await ctx.send("Bot has been taken offline.")
-        sys.exit(0)
+        sys.exit(code)
 
 
 async def setup(bot):

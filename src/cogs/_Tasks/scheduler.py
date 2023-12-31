@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+from db.client import make_engine
 import discord
 from discord.ext import commands, tasks
 from db.models import Snipe
@@ -20,6 +21,7 @@ class Scheduler(commands.Cog):
         self.clear_snipe.start()
         self.disconnect_voice.start()
         self.update_stats.start()
+        self.reset_db_connection.start()
 
     @tasks.loop(hours=3)
     async def send_logs(self):
@@ -66,6 +68,17 @@ class Scheduler(commands.Cog):
             )
         )
         self.bot.logger.info("Updated stats")
+
+    @tasks.loop(minutes=30)
+    async def reset_db_connection(self):
+        """Reset the database connection"""
+        self.bot.engine.dispose()
+        self.bot.engine = make_engine(loc=self.bot.db_loc)
+        self.bot.logger.info("Reset DB connection")
+    
+    @reset_db_connection.before_loop
+    async def before_reset_db_connection(self):
+        await self.bot.wait_until_ready()
 
     @send_logs.before_loop
     async def before_send_logs(self):
