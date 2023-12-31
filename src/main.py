@@ -96,8 +96,6 @@ class Bot(commands.AutoShardedBot):
                 ] = autoresponse.response
 
     async def on_ready(self):
-        
-
         self.curr_guilds = len(self.guilds)
 
         self.logger.info(f"* {self.user} connected to {self.curr_guilds} servers")

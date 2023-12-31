@@ -27,7 +27,7 @@ class ReadyRedis(redis.StrictRedis):
 
             self.ping_with_check()
             if logger is not None:
-                logger.info(f"Redis not ready, retrying in {check_interval}")
+                logger.info(f"Redis not ready, retrying in {check_interval}s")
 
 
 def get_redis(host: str, port: int, *, retry_on_error: bool = False) -> ReadyRedis:
