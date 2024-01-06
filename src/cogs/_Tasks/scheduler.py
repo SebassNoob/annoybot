@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 from db.client import make_engine
 import discord
 from discord.ext import commands, tasks
-from db.models import Snipe
+from db.models import Snipe, Hello
 from sqlalchemy.orm import Session
 import os
 import datetime
@@ -22,6 +22,7 @@ class Scheduler(commands.Cog):
         self.disconnect_voice.start()
         self.update_stats.start()
         self.reset_db_connection.start()
+        self.test_db_connection.start()
 
     @tasks.loop(hours=3)
     async def send_logs(self):
@@ -75,7 +76,27 @@ class Scheduler(commands.Cog):
         self.bot.engine.dispose()
         self.bot.engine = make_engine(loc=self.bot.db_loc)
         self.bot.logger.info("Reset DB connection")
-    
+
+    @tasks.loop(minutes=5)
+    async def test_db_connection(self):
+        """Test the database connection"""
+        msg = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        try:
+            with Session(self.bot.engine) as session:
+                session.add(Hello(msg=msg))
+                session.commit()
+                res = session.query(Hello).where(Hello.msg == msg).first()
+
+                self.bot.logger.info("Tested DB connection, result: %s", res)
+
+        except Exception as e:
+            self.bot.logger.error("Tested DB connection, error: %s", e)
+            raise SystemExit(1)
+
+    @test_db_connection.before_loop
+    async def before_test_db_connection(self):
+        await self.bot.wait_until_ready()
+
     @reset_db_connection.before_loop
     async def before_reset_db_connection(self):
         await self.bot.wait_until_ready()

@@ -72,7 +72,7 @@ class Error(commands.Cog):
     # only occurs for message commands
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
-        await ctx.send(error)
+        self.bot.logger.warning(error)
 
 
 async def setup(bot):
