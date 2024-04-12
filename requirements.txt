@@ -14,7 +14,7 @@ discord.py==2.3.2
 frozenlist==1.4.0
 greenlet==2.0.2
 hiredis==2.2.3
-idna==3.4
+idna==3.7
 libsql-client==0.3.0
 Mako==1.2.4
 MarkupSafe==2.1.3
