@@ -4,6 +4,7 @@ optimisation:
 - 40% faster /meme and /copypasta
 - 300% faster bot startup time 
 - caching implemented for all commands involving file reads, > 10% faster for most commands
+- bump to python 3.12
 
 
 UX:
@@ -43,4 +44,4 @@ fixes:
 - fixed conversion failure on /nicktroll when attempting to execute in a non guild channel
 
 known issues:
-- forced removal of the bot from a voice channel will trigger a forced reconnect, rendering the but unable to update its voice state. Fixed in the next version of discord.py
+- forced removal of the bot from a voice channel will trigger a forced reconnect, rendering the bot unable to update its voice state. Fixed in the next version of discord.py
