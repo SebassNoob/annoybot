@@ -70,14 +70,14 @@ class Scheduler(commands.Cog):
         )
         self.bot.logger.info("Updated stats")
 
-    @tasks.loop(minutes=30)
+    @tasks.loop(minutes=10)
     async def reset_db_connection(self):
         """Reset the database connection"""
         self.bot.engine.dispose()
         self.bot.engine = make_engine(loc=self.bot.db_loc)
         self.bot.logger.info("Reset DB connection")
 
-    @tasks.loop(minutes=5)
+    @tasks.loop(minutes=60)
     async def test_db_connection(self):
         """Test the database connection"""
         msg = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")

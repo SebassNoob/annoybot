@@ -20,3 +20,6 @@ dump/
 
 # ignore db files from previous version
 *.db
+
+# ignore venv
+.venv/
