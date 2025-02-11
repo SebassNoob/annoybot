@@ -14,5 +14,6 @@ def make_engine(
         echo_pool=debug,
         isolation_level="AUTOCOMMIT",
         connect_args={"check_same_thread": False},
+        pool_pre_ping=True
     )
     return engine

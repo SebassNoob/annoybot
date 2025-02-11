@@ -13,8 +13,8 @@ class Countusers(commands.Cog):
     @commands.is_owner()
     async def countusers(self, ctx):
         with Session(self.bot.engine) as session:
-          cnt = session.query(UserSettings).count()
-          await ctx.send(f"User count: {cnt}")
+            cnt = session.query(UserSettings).count()
+            await ctx.send(f"User count: {cnt}")
 
 
 async def setup(bot):

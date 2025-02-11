@@ -88,7 +88,7 @@ class Help(commands.Cog):
         view = discord.ui.View()
         view.add_item(HelpOptions(self.select_options, self.embeds))
         await interaction.response.send_message(
-            "The values in brackets are additional arguments to give.\n\* denotes an optional argument.\nAll commands require the ``send_messages`` permission.",
+            "The values in brackets are additional arguments to give.\n* denotes an optional argument.\nAll commands require the ``send_messages`` permission.",
             embed=self.embeds["Core features"],
             view=view,
         )

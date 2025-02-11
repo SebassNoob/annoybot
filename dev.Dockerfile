@@ -1,4 +1,4 @@
-FROM gorialis/discord.py:3.10-alpine-minimal
+FROM gorialis/discord.py:3.12-alpine-minimal
 
 WORKDIR /app
 
