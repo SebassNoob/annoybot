@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
+import os
 
 
 # SQLAlchemy engine
@@ -12,8 +13,10 @@ def make_engine(
         url,
         echo=echo,
         echo_pool=debug,
-        isolation_level="AUTOCOMMIT",
-        connect_args={"check_same_thread": False},
-        pool_pre_ping=True
+        connect_args={
+            "check_same_thread": False,
+            "auth_token": os.getenv("PROD_DB_TOKEN", None),
+        },
+        pool_pre_ping=True,
     )
     return engine

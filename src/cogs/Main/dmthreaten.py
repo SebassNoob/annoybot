@@ -64,9 +64,11 @@ class Dmthreaten(commands.Cog):
 
         em = discord.Embed(color=int(color, 16), description=threat)
         em.set_author(
-            name=f"{interaction.user.display_name} from {interaction.guild.name}"
-            if interaction.guild
-            else interaction.user.display_name,
+            name=(
+                f"{interaction.user.display_name} from {interaction.guild.name}"
+                if interaction.guild
+                else interaction.user.display_name
+            ),
             icon_url=interaction.user.avatar,
         )
         em.set_footer(
