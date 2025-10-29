@@ -48,7 +48,12 @@ def add_users_to_db_wrapped_engine(engine: Engine):
                             block_dms=False,
                         )
                     )
-                    session.commit()
+                    try:
+                        session.commit()
+                    except IntegrityError:
+                        # User was already added by another concurrent request, ignore
+                        session.rollback()
+                
                 if interaction.guild and not userserver_present:
                     session.add(
                         UserServer(
@@ -57,10 +62,15 @@ def add_users_to_db_wrapped_engine(engine: Engine):
                             blacklist=False,
                         )
                     )
-                    session.commit()
+                    try:
+                        session.commit()
+                    except IntegrityError:
+                        # UserServer was already added by another concurrent request, ignore
+                        session.rollback()
             except IntegrityError as e:
                 session.rollback()
-                raise Exception(e)
+                # Don't raise exception for integrity errors - they're expected in concurrent scenarios
+                pass
 
         # should always return True
         # This always executes before blacklist_check

@@ -23,3 +23,5 @@ dump/
 
 # ignore venv
 .venv/
+
+diff.txt

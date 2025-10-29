@@ -1,4 +1,5 @@
 # Annoybot
+[![Users](https://img.shields.io/discord/858200514914287646)](https://discord.gg/UCGAuRXmBD)
 
 This is the v2 rewrite for annoybot. ([<= 1.9.0 repo](https://github.com/SebassNoob/bot))
 
@@ -23,7 +24,7 @@ DONE:
 - Automatically sharded bot on the server
 - Turso primary db (sin)
 - redis client
-- scheduler with ``ediscord.ext.tasks``
+- scheduler with ``discord.ext.tasks``
 
 TODO:
 - Replication to secondary
