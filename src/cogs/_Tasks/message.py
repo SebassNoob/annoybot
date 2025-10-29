@@ -134,7 +134,8 @@ class Message(commands.Cog):
                         }
                     )
                 session.commit()
-            except (IntegrityError, TimeoutError) as e:
+            except (IntegrityError, ValueError, TimeoutError) as e:
+                # ValueError is raised by libsql for constraint violations
                 session.rollback()
                 self.bot.logger.error(e)
 

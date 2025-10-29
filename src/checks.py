@@ -50,26 +50,40 @@ def add_users_to_db_wrapped_engine(engine: Engine):
                     )
                     try:
                         session.commit()
-                    except IntegrityError:
+                    except (IntegrityError, ValueError) as e:
                         # User was already added by another concurrent request, ignore
+                        # ValueError is raised by libsql for constraint violations
                         session.rollback()
-                
+                        # Refresh to get the existing record
+                        session.expire_all()
+
+                # Ensure UserSettings exists before adding UserServer (for FOREIGN KEY constraint)
                 if interaction.guild and not userserver_present:
-                    session.add(
-                        UserServer(
-                            user_id=interaction.user.id,
-                            server_id=interaction.guild.id,
-                            blacklist=False,
-                        )
+                    # Verify the user exists in the database before adding UserServer
+                    user_exists = (
+                        session.query(UserSettings)
+                        .filter(UserSettings.id == interaction.user.id)
+                        .one_or_none()
                     )
-                    try:
-                        session.commit()
-                    except IntegrityError:
-                        # UserServer was already added by another concurrent request, ignore
-                        session.rollback()
-            except IntegrityError as e:
+
+                    if user_exists:
+                        session.add(
+                            UserServer(
+                                user_id=interaction.user.id,
+                                server_id=interaction.guild.id,
+                                blacklist=False,
+                            )
+                        )
+                        try:
+                            session.commit()
+                        except (IntegrityError, ValueError) as e:
+                            # UserServer was already added by another concurrent request, ignore
+                            # ValueError is raised by libsql for constraint violations
+                            session.rollback()
+            except (IntegrityError, ValueError) as e:
                 session.rollback()
                 # Don't raise exception for integrity errors - they're expected in concurrent scenarios
+                # ValueError is raised by libsql for constraint violations
                 pass
 
         # should always return True
@@ -92,8 +106,12 @@ def blacklist_check_wrapped_engine(engine: Engine):
                         (UserServer.user_id == interaction.user.id)
                         & (UserServer.server_id == interaction.guild.id)
                     )
-                    .one()
+                    .one_or_none()
                 )
+                # If userserver doesn't exist, allow the command (user will be added by add_users_to_db)
+                if userserver is None:
+                    return True
+
                 if userserver.blacklist:
                     em = discord.Embed(
                         color=0x000000,
@@ -101,9 +119,11 @@ def blacklist_check_wrapped_engine(engine: Engine):
                     )
                     await interaction.response.send_message(embed=em, ephemeral=True)
                     return False
-            except IntegrityError as e:
+            except (IntegrityError, ValueError) as e:
+                # ValueError is raised by libsql for constraint violations
                 session.rollback()
-                raise Exception(e)
+                # Allow the command to proceed - user will be added by add_users_to_db check
+                pass
         return True
 
     return blacklist_check

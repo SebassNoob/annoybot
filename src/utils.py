@@ -66,6 +66,7 @@ def add_user(
     """Adds a user to the database. WARNING: This assumes the user is not in the database already"""
     with Session(engine) as session:
         try:
+            # First add UserSettings
             session.add(
                 UserSettings(
                     id=user.id,
@@ -75,6 +76,8 @@ def add_user(
                     block_dms=False,
                 )
             )
+            session.flush()  # Flush to ensure UserSettings is in DB before adding UserServer
+
             if with_server:
                 session.add(
                     UserServer(
@@ -84,9 +87,10 @@ def add_user(
                     )
                 )
             session.commit()
-        except IntegrityError as e:
+        except (IntegrityError, ValueError):
+            # User or UserServer already exists, ignore the error
+            # ValueError is raised by libsql for constraint violations
             session.rollback()
-            raise Exception(e)
 
 
 def check_usersettings_cache(
